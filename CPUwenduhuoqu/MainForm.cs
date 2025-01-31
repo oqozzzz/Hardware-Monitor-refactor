@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Drawing;
 using System.IO.Ports;
 using System.Linq;
@@ -216,8 +216,8 @@ namespace CPUwenduhuoqu
         private void MainForm_Load(object sender, EventArgs e)
         {
             InitializeOrUpdateTimer(5000);
-            LoadSettings();
             RefreshSerialPorts();
+            LoadSettings();
             InitializeDomainUpDown();
             notifyIcon.ContextMenu = new ContextMenu(new MenuItem[]
             {
@@ -312,6 +312,22 @@ namespace CPUwenduhuoqu
             }
             else
                 settingsLoadedSuccessfully = false;
+
+            string serialPorts = ConfigurationManager.AppSettings["serialPorts"];
+            //Console.WriteLine($"readConfig{serialPorts}");
+
+            if (comboBoxSerialPorts.Items.Contains(serialPorts))
+            {
+                comboBoxSerialPorts.SelectedItem = serialPorts;
+                //buttonConnect.PerformClick();
+                settingsLoadedSuccessfully = true;
+            }
+            else
+            {
+                MessageBox.Show($"Serial Port '{serialPorts}' don't exist!");
+                settingsLoadedSuccessfully = false;
+            }
+
             return settingsLoadedSuccessfully;
         }
 
@@ -332,6 +348,8 @@ namespace CPUwenduhuoqu
             else
                 config.AppSettings.Settings["useAida64Mode"].Value = "false";
 
+            config.AppSettings.Settings["serialPorts"].Value = $"{this.comboBoxSerialPorts.Text}";
+
             config.Save(ConfigurationSaveMode.Modified);
 
             ConfigurationManager.RefreshSection("appSettings");
@@ -339,28 +357,42 @@ namespace CPUwenduhuoqu
 
         private void buttonConnect_Click(object sender, EventArgs e)
         {
+            // if serialport is connected ,it should "not" be close
             if (serialPort != null && serialPort.IsOpen)
             {
-                serialPort.Close();
+                MessageBox.Show("For safety reason, you can't close an establied connection until exiting this program.");
+                return;
             }
 
             if (comboBoxSerialPorts.SelectedItem != null)
             {
-                serialPort = new SerialPort(comboBoxSerialPorts.SelectedItem.ToString())
-                {
-                    BaudRate = 115200
-                };
-
                 try
                 {
+                    serialPort = new SerialPort(comboBoxSerialPorts.SelectedItem.ToString())
+                    {
+                        BaudRate = 115200
+                    };
                     serialPort.Open();
+
                     labelConnectionStatus.Text = "Connected";
+                    buttonConnect.Text = "Disconnect";  
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"Error: {ex.Message}");
+                    if (serialPort != null)
+                    {
+                        serialPort.Dispose();
+                        serialPort = null;
+                    }
+                    MessageBox.Show($"An error occured when connecting: {ex.Message}\nYour operations might be so fast.");
                     labelConnectionStatus.Text = "Disconnected";
+                    buttonConnect.Text = "Connect"; 
                 }
+            }
+            else
+            {
+                // 未选择端口时提示
+                MessageBox.Show("Choose a port first！");
             }
         }
 
