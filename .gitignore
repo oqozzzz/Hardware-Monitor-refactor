@@ -1,0 +1,28 @@
+# Visual Studio
+.vs/
+*.suo
+*.user
+*.dtbcache.json
+*.userosscache
+*.sln.docstates
+
+# Build outputs
+bin/
+obj/
+*.exe
+*.dll
+*.pdb
+*.sys
+*.tmp
+*.resources
+
+# NuGet packages
+packages/
+
+# Upgrade logs
+UpgradeLog.htm
+UpgradeLog*.htm
+
+# OS files
+.DS_Store
+Thumbs.db
