@@ -37,6 +37,10 @@ void task_safety(void *pvParameters)
         if (now - hb_pwm     > HEARTBEAT_TIMEOUT_MS) fault = true;
 
         if (fault) {
+            state_lock();
+            g_state.safety_override = true;
+            g_state.target_duty = PWM_MAX_DUTY;
+            state_unlock();
             ledcWrite(PWM_CHANNEL, PWM_MAX_DUTY);
             Serial.println(F("[SAFETY] Fault detected! Fan forced to 100%"));
         }

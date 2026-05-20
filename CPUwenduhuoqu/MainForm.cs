@@ -16,7 +16,7 @@ namespace CPUwenduhuoqu
         private SerialPortService _serialService;
         private readonly AppConfigService _config = new AppConfigService();
         private System.Windows.Forms.Timer _updateTimer;
-        private int _timerCounter;
+
         private bool _isExiting;
 
         public MainForm()
@@ -200,12 +200,10 @@ namespace CPUwenduhuoqu
                         gpuTempLabel.Text = $"GPU 温度: {(gpuTemp.HasValue ? gpuTemp.Value.ToString("F1") + " °C" : "无数据")}";
                     }));
 
-                    if (_timerCounter % 2 == 0 && cpuTemp.HasValue)
+                    if (cpuTemp.HasValue)
                         _serialService?.Send(Protocol.BuildTempFrame(true, cpuTemp.Value));
-                    else if (_timerCounter % 2 == 1 && gpuTemp.HasValue)
+                    if (gpuTemp.HasValue)
                         _serialService?.Send(Protocol.BuildTempFrame(false, gpuTemp.Value));
-
-                    _timerCounter++;
                 }
                 catch (Exception ex)
                 {

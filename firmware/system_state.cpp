@@ -22,7 +22,7 @@ bool state_init(void)
 
     g_state.cpu_valid      = false;
     g_state.gpu_valid      = false;
-    g_state.last_data_ms   = 0;
+
 
     g_state.status_query_pending = false;
     g_state.fcurve_query_pending = false;
@@ -70,7 +70,7 @@ void state_set_temp(bool is_cpu, float temp)
         g_state.gpu_valid   = true;
         g_state.last_gpu_ms = now;
     }
-    g_state.last_data_ms  = now;
+
     g_state.display_dirty = true;
     state_unlock();
 }

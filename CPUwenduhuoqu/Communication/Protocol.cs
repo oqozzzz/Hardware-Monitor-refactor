@@ -174,10 +174,16 @@ namespace CPUwenduhuoqu.Communication
             points = new FanCurvePoint[count];
             for (int i = 0; i < count; i++)
             {
+                float temp;
+                byte duty;
+                if (!float.TryParse(parts[2 + i * 2], NumberStyles.Float, CultureInfo.InvariantCulture, out temp))
+                    return false;
+                if (!byte.TryParse(parts[3 + i * 2], NumberStyles.Integer, CultureInfo.InvariantCulture, out duty))
+                    return false;
                 points[i] = new FanCurvePoint
                 {
-                    Temperature = float.Parse(parts[2 + i * 2], CultureInfo.InvariantCulture),
-                    DutyPercent = byte.Parse(parts[3 + i * 2], CultureInfo.InvariantCulture)
+                    Temperature = temp,
+                    DutyPercent = duty
                 };
             }
             return true;

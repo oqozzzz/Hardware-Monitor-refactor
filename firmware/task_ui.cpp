@@ -175,8 +175,10 @@ void task_ui(void *pvParameters)
         uint32_t now    = millis();
 
         // 数据超时检测
-        if (now - g_state.last_data_ms > DATA_TIMEOUT_MS) {
+        if (now - g_state.last_cpu_ms > DATA_TIMEOUT_MS) {
             cpu_ok = false;
+        }
+        if (now - g_state.last_gpu_ms > DATA_TIMEOUT_MS) {
             gpu_ok = false;
         }
 

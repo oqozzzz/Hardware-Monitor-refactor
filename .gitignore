@@ -29,3 +29,5 @@ UpgradeLog*.htm
 # OS files
 .DS_Store
 Thumbs.db
+
+.workbuddy/

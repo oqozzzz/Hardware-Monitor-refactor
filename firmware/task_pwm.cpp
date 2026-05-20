@@ -19,20 +19,23 @@ void task_pwm(void *pvParameters)
         vTaskDelayUntil(&last_wake, pdMS_TO_TICKS(PWM_PERIOD_MS));
 
         state_lock();
+        bool override = g_state.safety_override;
         uint8_t target = g_state.target_duty;
         state_unlock();
 
-        int diff = static_cast<int>(target) - static_cast<int>(current);
-        if (diff > PWM_RAMP_STEP) {
-            current += PWM_RAMP_STEP;
-        } else if (diff < -PWM_RAMP_STEP) {
-            current -= PWM_RAMP_STEP;
+        if (override) {
+            current = PWM_MAX_DUTY;
         } else {
-            current = target;
+            int diff = static_cast<int>(target) - static_cast<int>(current);
+            if (diff > PWM_RAMP_STEP) {
+                current += PWM_RAMP_STEP;
+            } else if (diff < -PWM_RAMP_STEP) {
+                current -= PWM_RAMP_STEP;
+            } else {
+                current = target;
+            }
+            if (current > PWM_MAX_DUTY) current = PWM_MAX_DUTY;
         }
-
-        // 安全钳位
-        if (current > PWM_MAX_DUTY) current = PWM_MAX_DUTY;
 
         ledcWrite(PWM_CHANNEL, current);
 

@@ -21,7 +21,6 @@ struct SystemState {
     bool      gpu_valid;      // GPU 数据是否在有效期内
     uint32_t  last_cpu_ms;    // 上次收到 CPU 数据的时间戳
     uint32_t  last_gpu_ms;    // 上次收到 GPU 数据的时间戳
-    uint32_t  last_data_ms;   // 上次收到任何数据的时间戳
 
     // ---- 控制输出 ----------------------------------------------------------
     OpMode    mode;
@@ -41,6 +40,9 @@ struct SystemState {
 
     // ---- UI 脏标记 ---------------------------------------------------------
     bool      display_dirty;  // 为 true 时 UI 任务将在下次周期刷新 OLED
+
+    // ---- 安全状态 -----------------------------------------------------------
+    bool      safety_override; // 安全任务触发后置位，PWM 任务强制 100%，仅复位可清除
 
     // ---- 任务心跳（由安全任务监控）------------------------------------------
     volatile uint32_t heartbeat_bt_rx;

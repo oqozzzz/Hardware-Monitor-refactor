@@ -42,8 +42,10 @@ void task_bt_tx(void *pvParameters)
         bool    cpu_valid    = g_state.cpu_valid;
         bool    gpu_valid    = g_state.gpu_valid;
 
-        if (now - g_state.last_data_ms > DATA_TIMEOUT_MS) {
+        if (now - g_state.last_cpu_ms > DATA_TIMEOUT_MS) {
             cpu_valid = false;
+        }
+        if (now - g_state.last_gpu_ms > DATA_TIMEOUT_MS) {
             gpu_valid = false;
         }
         state_unlock();
