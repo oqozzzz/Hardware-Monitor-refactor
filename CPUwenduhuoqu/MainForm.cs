@@ -16,6 +16,7 @@ namespace CPUwenduhuoqu
         private SerialPortService _serialService;
         private readonly AppConfigService _config = new AppConfigService();
         private System.Windows.Forms.Timer _updateTimer;
+        private StatusData _lastStatus;
 
         private bool _isExiting;
 
@@ -377,6 +378,55 @@ namespace CPUwenduhuoqu
                 return;
             }
             Task.Run(() => _serialService.Send(Protocol.BuildStatusQuery()));
+        }
+
+        // ====================================================================
+        // Remote Control Buttons (对应 ESP32 实体按键)
+        // ====================================================================
+
+        private bool CheckConnected()
+        {
+            if (_serialService == null || !_serialService.IsOpen)
+            {
+                MessageBox.Show("未连接到设备。", "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return false;
+            }
+            return true;
+        }
+
+        private void BtnRemoteMode_Click(object sender, EventArgs e)
+        {
+            if (!CheckConnected()) return;
+            int nextMode = _lastStatus.Mode >= 4 ? 1 : _lastStatus.Mode + 1;
+            Task.Run(() => _serialService.Send(Protocol.BuildModeSet(nextMode)));
+        }
+
+        private void BtnRemoteFreqUp_Click(object sender, EventArgs e)
+        {
+            if (!CheckConnected()) return;
+            int newFreq = Math.Min(_lastStatus.FreqHz + 200, 40000);
+            Task.Run(() => _serialService.Send(Protocol.BuildFreqSet(newFreq)));
+        }
+
+        private void BtnRemoteFreqDn_Click(object sender, EventArgs e)
+        {
+            if (!CheckConnected()) return;
+            int newFreq = Math.Max(_lastStatus.FreqHz - 200, 1000);
+            Task.Run(() => _serialService.Send(Protocol.BuildFreqSet(newFreq)));
+        }
+
+        private void BtnRemoteDutyUp_Click(object sender, EventArgs e)
+        {
+            if (!CheckConnected()) return;
+            int newDuty = Math.Min(_lastStatus.DutyPercent + 10, 100);
+            Task.Run(() => _serialService.Send(Protocol.BuildDutySet(newDuty)));
+        }
+
+        private void BtnRemoteDutyDn_Click(object sender, EventArgs e)
+        {
+            if (!CheckConnected()) return;
+            int newDuty = Math.Max(_lastStatus.DutyPercent - 10, 0);
+            Task.Run(() => _serialService.Send(Protocol.BuildDutySet(newDuty)));
         }
 
         // ====================================================================

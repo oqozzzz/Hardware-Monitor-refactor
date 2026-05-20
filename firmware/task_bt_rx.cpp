@@ -93,6 +93,39 @@ void task_bt_rx(void *pvParameters)
                                 break;
                             }
 
+                            case FrameType::MODE_SET:
+                                state_set_mode(static_cast<OpMode>(frame.ctrl.mode));
+                                if (g_state.tx_queue) {
+                                    char ack_buf[TX_BUF_SIZE];
+                                    size_t ack_len = build_ack(ack_buf, TX_BUF_SIZE);
+                                    if (ack_len > 0) { ack_buf[ack_len] = '\0'; xQueueSend(g_state.tx_queue, ack_buf, 0); }
+                                }
+                                break;
+
+                            case FrameType::FREQ_SET:
+                                ledcSetup(PWM_CHANNEL, frame.ctrl.freq, PWM_RES_BITS);
+                                ledcWrite(PWM_CHANNEL, g_state.current_duty);
+                                state_lock();
+                                g_state.pwm_freq_hz = frame.ctrl.freq;
+                                state_unlock();
+                                if (g_state.tx_queue) {
+                                    char ack_buf[TX_BUF_SIZE];
+                                    size_t ack_len = build_ack(ack_buf, TX_BUF_SIZE);
+                                    if (ack_len > 0) { ack_buf[ack_len] = '\0'; xQueueSend(g_state.tx_queue, ack_buf, 0); }
+                                }
+                                break;
+
+                            case FrameType::DUTY_SET: {
+                                uint8_t duty_raw = static_cast<uint8_t>(map(frame.ctrl.duty, 0, 100, 0, 255));
+                                state_set_target_duty(duty_raw);
+                                if (g_state.tx_queue) {
+                                    char ack_buf[TX_BUF_SIZE];
+                                    size_t ack_len = build_ack(ack_buf, TX_BUF_SIZE);
+                                    if (ack_len > 0) { ack_buf[ack_len] = '\0'; xQueueSend(g_state.tx_queue, ack_buf, 0); }
+                                }
+                                break;
+                            }
+
                             case FrameType::UNKNOWN:
                                 if (g_state.tx_queue) {
                                     char nack_buf[TX_BUF_SIZE];

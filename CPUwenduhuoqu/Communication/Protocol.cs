@@ -86,6 +86,27 @@ namespace CPUwenduhuoqu.Communication
             return FinalizeFrame(sb.ToString());
         }
 
+        public static string BuildModeSet(int mode)
+        {
+            if (mode < 1 || mode > 4)
+                throw new ArgumentException("Mode must be 1-4");
+            return FinalizeFrame($"MOD,{mode}");
+        }
+
+        public static string BuildFreqSet(int freqHz)
+        {
+            if (freqHz < 1000 || freqHz > 40000)
+                throw new ArgumentException("Frequency must be 1000-40000 Hz");
+            return FinalizeFrame($"FRQ,{freqHz}");
+        }
+
+        public static string BuildDutySet(int dutyPercent)
+        {
+            if (dutyPercent < 0 || dutyPercent > 100)
+                throw new ArgumentException("Duty must be 0-100%");
+            return FinalizeFrame($"DUT,{dutyPercent}");
+        }
+
         // ---- 帧解析 ----
 
         public static FrameType IdentifyFrame(string frame)

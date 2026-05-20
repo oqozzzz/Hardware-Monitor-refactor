@@ -16,6 +16,8 @@ namespace CPUwenduhuoqu
         private Label _lblDashUpdate;
         private TextBox _txtStatusLog;
         private Button _btnToggleView;
+        private Button _btnRemoteMode, _btnRemoteFreqUp, _btnRemoteFreqDn;
+        private Button _btnRemoteDutyUp, _btnRemoteDutyDn;
         private bool _isDashboardMode = true;
 
         // 最小化到托盘
@@ -38,7 +40,7 @@ namespace CPUwenduhuoqu
 
         private void BuildUi()
         {
-            this.ClientSize = new Size(720, 608);
+            this.ClientSize = new Size(720, 630);
             this.Font = new Font("Microsoft YaHei UI", 9F);
 
             RepositionDesignerControls();
@@ -120,7 +122,7 @@ namespace CPUwenduhuoqu
             statusStrip.Location = new Point(0, 580);
         }
 
-        // ---- 固件状态区 (y=136, h=155) ----
+        // ---- 固件状态区 (y=136, h=180) ----
 
         private void BuildEsp32Section()
         {
@@ -128,14 +130,14 @@ namespace CPUwenduhuoqu
             {
                 Text = "固件状态",
                 Location = new Point(10, 136),
-                Size = new Size(700, 155),
+                Size = new Size(650, 190),
                 Font = this.Font
             };
 
             _btnToggleView = new Button
             {
                 Text = "日志模式",
-                Location = new Point(594, 14),
+                Location = new Point(544, 14),
                 Size = new Size(95, 32),
                 UseVisualStyleBackColor = true
             };
@@ -144,7 +146,7 @@ namespace CPUwenduhuoqu
             _dashboardPanel = new Panel
             {
                 Location = new Point(8, 24),
-                Size = new Size(684, 112)
+                Size = new Size(634, 140)
             };
 
             var headFont = new Font("Microsoft YaHei UI", 10F, FontStyle.Bold);
@@ -153,7 +155,7 @@ namespace CPUwenduhuoqu
 
             // Row A: 模式 / 风扇 / 频率
             DashLabel("模式:", 10, 8, headFont);
-            _lblDashMode = DashValue("--", 60, 8, dataFont, Color.DarkBlue, 80);
+            _lblDashMode = DashValue("--", 64, 8, dataFont, Color.DarkBlue, 80);
 
             DashLabel("风扇:", 170, 8, headFont);
             _lblDashFan = DashValue("--", 222, 8, dataFont, Color.DarkGreen, 70);
@@ -204,6 +206,66 @@ namespace CPUwenduhuoqu
             };
             _dashboardPanel.Controls.Add(_lblDashUpdate);
 
+            // ---- 远程控制按钮行 (y=110) ----
+            var btnFont = new Font("Microsoft YaHei UI", 8F);
+            var btnSize = new Size(62, 30);
+
+            _btnRemoteMode = new Button
+            {
+                Text = "模式",
+                Location = new Point(10, 110),
+                Size = btnSize,
+                Font = btnFont,
+                UseVisualStyleBackColor = true
+            };
+            _btnRemoteMode.Click += BtnRemoteMode_Click;
+
+            _btnRemoteFreqUp = new Button
+            {
+                Text = "频率+",
+                Location = new Point(72, 110),
+                Size = btnSize,
+                Font = btnFont,
+                UseVisualStyleBackColor = true
+            };
+            _btnRemoteFreqUp.Click += BtnRemoteFreqUp_Click;
+
+            _btnRemoteFreqDn = new Button
+            {
+                Text = "频率-",
+                Location = new Point(134, 110),
+                Size = btnSize,
+                Font = btnFont,
+                UseVisualStyleBackColor = true
+            };
+            _btnRemoteFreqDn.Click += BtnRemoteFreqDn_Click;
+
+            _btnRemoteDutyUp = new Button
+            {
+                Text = "占空+",
+                Location = new Point(196, 110),
+                Size = btnSize,
+                Font = btnFont,
+                UseVisualStyleBackColor = true
+            };
+            _btnRemoteDutyUp.Click += BtnRemoteDutyUp_Click;
+
+            _btnRemoteDutyDn = new Button
+            {
+                Text = "占空-",
+                Location = new Point(258, 110),
+                Size = btnSize,
+                Font = btnFont,
+                UseVisualStyleBackColor = true
+            };
+            _btnRemoteDutyDn.Click += BtnRemoteDutyDn_Click;
+
+            _dashboardPanel.Controls.Add(_btnRemoteMode);
+            _dashboardPanel.Controls.Add(_btnRemoteFreqUp);
+            _dashboardPanel.Controls.Add(_btnRemoteFreqDn);
+            _dashboardPanel.Controls.Add(_btnRemoteDutyUp);
+            _dashboardPanel.Controls.Add(_btnRemoteDutyDn);
+
             // 日志文本框（初始隐藏）
             _txtStatusLog = new TextBox
             {
@@ -222,14 +284,14 @@ namespace CPUwenduhuoqu
             this.Controls.Add(_grpEsp32);
         }
 
-        // ---- 风扇曲线区 (y=299, h=240) ----
+        // ---- 风扇曲线区 (y=330, h=240) ----
 
         private void BuildFanCurveSection()
         {
             _grpFanCurve = new GroupBox
             {
                 Text = "风扇曲线配置",
-                Location = new Point(10, 299),
+                Location = new Point(10, 330),
                 Size = new Size(700, 240),
                 Font = this.Font
             };
@@ -330,6 +392,7 @@ namespace CPUwenduhuoqu
         private void UpdateDashboard(StatusData s)
         {
             if (!_isDashboardMode) return;
+            _lastStatus = s;
 
             string modeStr;
             switch (s.Mode)

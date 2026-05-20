@@ -13,6 +13,9 @@ enum class FrameType : uint8_t {
     STATUS_QUERY,   // $STA,?*XX
     FCURVE_SET,     // $FCV,N,t1,d1,...,tN,dN*XX
     FCURVE_QUERY,   // $FCQ,?*XX
+    MODE_SET,       // $MOD,<1-4>*XX
+    FREQ_SET,       // $FRQ,<hz>*XX
+    DUTY_SET,       // $DUT,<0-100>*XX
     UNKNOWN
 };
 
@@ -32,6 +35,11 @@ struct ParsedFrame {
             uint8_t      count;  // FCURVE_SET: 点数
             FanCurvePoint points[10];
         } fcurve;
+        struct {
+            uint8_t mode;       // MODE_SET: 1=QUIET,2=NORMAL,3=TURBO,4=MANUAL
+            int     freq;       // FREQ_SET: PWM 频率 Hz
+            uint8_t duty;       // DUTY_SET: 占空比 0-100%
+        } ctrl;
     };
 };
 

@@ -1,4 +1,5 @@
 #include "protocol.h"
+#include "config.h"
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -83,6 +84,33 @@ bool parse_frame(const char *line, size_t len, ParsedFrame &out)
         }
 
         out.type = FrameType::FCURVE_SET;
+        return true;
+    }
+
+    // ---- MODE_SET: $MOD,<1-4>*XX ----
+    if (data_len >= 5 && strncmp(data_start, "MOD,", 4) == 0) {
+        long mode = strtol(data_start + 4, nullptr, 10);
+        if (mode < 1 || mode > 4) return false;
+        out.ctrl.mode = static_cast<uint8_t>(mode);
+        out.type = FrameType::MODE_SET;
+        return true;
+    }
+
+    // ---- FREQ_SET: $FRQ,<hz>*XX ----
+    if (data_len >= 6 && strncmp(data_start, "FRQ,", 4) == 0) {
+        long freq = strtol(data_start + 4, nullptr, 10);
+        if (freq < PWM_FREQ_MIN || freq > PWM_FREQ_MAX) return false;
+        out.ctrl.freq = static_cast<int>(freq);
+        out.type = FrameType::FREQ_SET;
+        return true;
+    }
+
+    // ---- DUTY_SET: $DUT,<0-100>*XX ----
+    if (data_len >= 5 && strncmp(data_start, "DUT,", 4) == 0) {
+        long duty = strtol(data_start + 4, nullptr, 10);
+        if (duty < 0 || duty > 100) return false;
+        out.ctrl.duty = static_cast<uint8_t>(duty);
+        out.type = FrameType::DUTY_SET;
         return true;
     }
 
