@@ -15,23 +15,18 @@ static uint8_t calculate_target_duty(float temp, OpMode mode, const FanCurve &cu
     }
 
     uint8_t base_percent = curve.lookup(temp);
-    uint8_t final_percent = base_percent;
 
+    float gamma;
     switch (mode) {
-        case OpMode::QUIET:
-            final_percent = static_cast<uint8_t>(base_percent * 0.50f);
-            break;
-        case OpMode::NORMAL:
-            final_percent = static_cast<uint8_t>(base_percent * 0.75f);
-            break;
-        case OpMode::TURBO:
-            final_percent = base_percent;
-            break;
-        default:
-            break;
+        case OpMode::QUIET:  gamma = 1.6f;  break;
+        case OpMode::NORMAL: gamma = 1.2f;  break;
+        case OpMode::TURBO:  gamma = 0.85f; break;
+        default:             gamma = 1.0f;  break;
     }
 
-    return static_cast<uint8_t>(map(final_percent, 0, 100, 0, 255));
+    float norm = static_cast<float>(base_percent) / 100.0f;
+    float corrected = pow(norm, gamma);
+    return static_cast<uint8_t>(corrected * 255.0f);
 }
 
 // ============================================================================

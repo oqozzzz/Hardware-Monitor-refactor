@@ -44,10 +44,11 @@ struct DefaultFanCurvePoint {
 
 static const DefaultFanCurvePoint DEFAULT_FAN_CURVE[] = {
     {0.0f,   20},
-    {35.0f,  20},
-    {50.0f,  40},
-    {65.0f,  70},
-    {80.0f,  90},
+    {30.0f,  20},
+    {45.0f,  35},
+    {60.0f,  55},
+    {75.0f,  75},
+    {90.0f,  95},
     {100.0f, 100},
 };
 constexpr int DEFAULT_FAN_CURVE_POINTS = sizeof(DEFAULT_FAN_CURVE) / sizeof(DEFAULT_FAN_CURVE[0]);

@@ -41,11 +41,33 @@ uint8_t FanCurve::lookup(float temp) const
 
     for (uint8_t i = 0; i < _count - 1; i++) {
         if (temp >= _points[i].temperature && temp < _points[i + 1].temperature) {
-            float t0 = _points[i].temperature;
-            float t1 = _points[i + 1].temperature;
-            float d0 = static_cast<float>(_points[i].duty_percent);
-            float d1 = static_cast<float>(_points[i + 1].duty_percent);
-            float duty = d0 + (d1 - d0) * (temp - t0) / (t1 - t0);
+            // Catmull-Rom spline (α=0.5): C1 continuous, monotonicity preserved via clamp
+            uint8_t i0 = (i > 0) ? i - 1 : i;
+            uint8_t i1 = i;
+            uint8_t i2 = i + 1;
+            uint8_t i3 = (i < _count - 2) ? i + 2 : i + 1;
+
+            float d0 = static_cast<float>(_points[i0].duty_percent);
+            float d1 = static_cast<float>(_points[i1].duty_percent);
+            float d2 = static_cast<float>(_points[i2].duty_percent);
+            float d3 = static_cast<float>(_points[i3].duty_percent);
+
+            float t = (temp - _points[i1].temperature)
+                    / (_points[i2].temperature - _points[i1].temperature);
+            float tt = t * t;
+            float ttt = tt * t;
+
+            float c0 = -0.5f * ttt +        tt - 0.5f * t;
+            float c1 =  1.5f * ttt - 2.5f * tt + 1.0f;
+            float c2 = -1.5f * ttt + 2.0f * tt + 0.5f * t;
+            float c3 =  0.5f * ttt - 0.5f * tt;
+
+            float duty = c0 * d0 + c1 * d1 + c2 * d2 + c3 * d3;
+
+            // 钳位防过冲，保证单调性
+            if (duty < d1) duty = d1;
+            if (duty > d2) duty = d2;
+
             return static_cast<uint8_t>(duty);
         }
     }
