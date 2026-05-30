@@ -1,6 +1,21 @@
-# 硬件温度监控器
+﻿# 硬件温度监控器
 
 PC 端 CPU / GPU 温度监控 + ESP32 风扇自动控制器。基于 B 站用户[垃圾研究社](https://space.bilibili.com/376404862) 开源的 [DIY 压风式散热器](https://www.bilibili.com/video/BV1Lr421M7u2) 方案重构而来。
+
+![UI 截图](屏幕截图%202026-05-30%20221547.png)
+
+---
+
+## 功能概览
+
+- 实时读取 CPU / GPU 温度（LibreHardwareMonitor / AIDA64 双数据源）
+- 蓝牙 SPP 串口通信，远程控制 ESP32 风扇
+- 仪表盘显示 ESP32 遥测（模式、风扇占空比、PWM 频率、温度）
+- 远程切换运行模式（静音 / 正常 / Turbo / 手动）
+- 远程调节 PWM 频率和占空比
+- 在线上传 / 读取风扇曲线（最多 10 点，Catmull-Rom 样条插值）
+- 最小化到系统托盘，后台运行
+- 可持久化配置（串口、刷新间隔、AIDA64 模式、风扇曲线）
 
 ---
 
@@ -49,21 +64,13 @@ ESP32 每 2 秒自动发送 STATUS_RSP 遥测帧。
 
 ---
 
-## PC 端程序
-
-### 技术栈
-
-- C# WinForms, .NET Framework 4.8
-- [LibreHardwareMonitorLib 0.9.3](https://github.com/LibreHardwareMonitor/LibreHardwareMonitor)
-- AIDA64 注册表读取（可选）
-
-### 代码结构
+## PC 端代码结构
 
 ```
 CPUwenduhuoqu/
 ├── MainForm.cs              # 业务逻辑（生命周期、定时器、串口通信、远程控制、事件处理）
-├── MainForm.Layout.cs       # UI 构建（控件创建、布局定位、仪表盘、数据更新）
-├── MainForm.Designer.cs     # VS 设计器管理的基础控件
+├── MainForm.Designer.cs     # VS 设计器管理的 UI 控件布局
+├── Program.cs               # 程序入口
 ├── App.config               # 可持久化配置
 ├── Hardware/
 │   ├── IHardwareMonitor.cs          # 硬件监控接口
@@ -77,106 +84,44 @@ CPUwenduhuoqu/
     └── AppConfigService.cs   # 类型化配置读写
 ```
 
-### UI 布局
-
-```
-┌─ 720×630 ──────────────────────────────────────────────┐
-│ CPU 温度: XX.X °C                GPU 温度: XX.X °C      │
-│ [COM端口▼] [连接] 状态     刷新间隔: [▼] [确认]          │
-│ [☐ 使用AIDA64获取温度信息]        [☐ 最小化到托盘]       │
-│ CPU传感器: [▼]      GPU传感器: [▼]     [确认]            │
-│ ┌─ 固件状态 (700×180) ───────────────────── [日志模式] ┐ │
-│ │  模式: 正常      风扇: 65%       频率: 25kHz         │  │
-│ │  ──────────────────────────────────────────         │  │
-│ │  CPU: 55.2°C ✓                GPU: 48.0°C ✓        │  │
-│ │  最后更新: 14:32:05                                 │  │
-│ │  [模式] [频率+] [频率-] [占空+] [占空-]               │  │
-│ └────────────────────────────────────────────────────┘  │
-│ ┌─ 风扇曲线配置 (700×240) ────────────────────────────┐  │
-│ │  [温度(°C) │ 占空比(%)]     [发送曲线]              │  │
-│ │  [可编辑表格 7行 ]          [读取曲线]              │  │
-│ │                            [查询状态]              │  │
-│ └────────────────────────────────────────────────────┘  │
-│ [状态栏: 来源信息]                                      │
-└────────────────────────────────────────────────────────┘
-```
-
-### 主要功能
-
-- **温度监控**：LibreHardwareMonitor（默认）或 AIDA64 注册表两种数据源
-- **每 tick 独立发送 CPU/GPU 温度**，单数据源场景不再触发超时
-- **串口通信**：蓝牙 SPP 虚拟 COM 端口，115200 baud，线程安全带超时保护
-- **固件状态面板**：仪表盘/日志双模式，一键切换
-  - 仪表盘模式：固定位置原地刷新，显示模式/风扇/频率/CPU/GPU/有效标志/更新时间
-  - 日志模式：滚动文本，保留最近 200 行通信记录
-- **远程控制按钮**（与 ESP32 实体按键功能对等）：
-  - 模式 — 循环切换 静音→正常→Turbo→手动
-  - 频率+/− — PWM 频率 ±200Hz
-  - 占空+/− — 目标占空比 ±10%
-- **风扇曲线在线配置**：可编辑表格，支持发送/读取 ESP32 风扇曲线
-- **托盘常驻**：始终显示托盘图标，可选"最小化到托盘"（关闭按钮行为可配置）
-- **配置持久化**：刷新间隔、串口名称、传感器选择等写入 App.config
-
-### 配置项 (App.config)
-
-| 键 | 默认值 | 说明 |
-|----|--------|------|
-| RefreshInterval | 5000 | 温度刷新间隔 (ms) |
-| SerialPortName | COM3 | 蓝牙串口名称 |
-| BaudRate | 115200 | 串口波特率 |
-| UseAida64Mode | false | 是否使用 AIDA64 |
-| SelectedCpuSensor | Label.TCPU | 上次选择的 CPU 传感器 |
-| SelectedGpuSensor | Label.TGPU1 | 上次选择的 GPU 传感器 |
-| MinimizeToTray | true | 关闭按钮是否最小化到托盘 |
-| LastFanCurve | (空) | 上次发送的风扇曲线 |
-
 ---
 
-## ESP32 固件
-
-### 技术栈
-
-- ESP32 Dev Module + Arduino 框架
-- FreeRTOS（Arduino 内核内置）
-- BluetoothSerial（经典蓝牙 SPP）
-- Adafruit SSD1306 + Adafruit GFX（OLED 显示）
-
-### 代码结构
+## ESP32 固件代码结构
 
 ```
 firmware/
-├── firmware.ino           # 主入口，硬件初始化 + 7 任务创建
-├── config.h               # 引脚/PWM/默认风扇曲线/任务栈大小/优先级/协议缓冲区
-├── protocol.h/cpp         # 帧解析 (parse_frame) + 帧构建 (build_*)
-├── fan_curve.h/cpp        # 运行时可变风扇曲线（Catmull-Rom 样条插值、在线更新）
-├── system_state.h/cpp     # 全局共享状态 + 互斥锁 + 快捷读写 API
-├── task_bt_rx.h/cpp       # 蓝牙接收任务 (10ms, 帧类型路由)
-├── task_bt_tx.h/cpp       # 蓝牙发送任务 (50ms, 遥测 + 查询应答)
-├── task_control.h/cpp     # 温度控制任务 (100ms, 样条查表 + Gamma 校正)
-├── task_pwm.h/cpp         # PWM 输出任务 (50ms, 斜坡逼近目标值 + 安全覆盖保持)
-├── task_ui.h/cpp          # OLED 显示任务 (100ms, 脏标记优化, 各路独立超时判定)
-├── task_button.h/cpp      # 按钮输入任务 (20ms, 60ms 消抖)
-└── safety.h/cpp           # 安全监控任务 (1s, 看门狗 + 心跳 + 故障强制全速 + safety_override)
+├── firmware.ino             # 主入口（引脚定义、任务创建、setup/loop）
+├── config.h                 # 全局常量（风扇曲线、阈值、任务参数）
+├── protocol.h/cpp           # 帧编解码、校验和、命令路由
+├── system_state.h/cpp       # 全局共享状态 + Mutex
+├── fan_curve.h/cpp          # Catmull-Rom 样条插值 + Gamma 校正
+├── safety.h/cpp             # 任务看门狗 + 心跳监控 + 故障强制全速
+├── task_bt_rx.h/cpp         # 蓝牙接收任务 (10ms, 轮询 + 帧路由)
+├── task_bt_tx.h/cpp         # 蓝牙发送任务 (50ms, ACK/NACK/遥测)
+├── task_control.h/cpp       # 温度→占空比控制任务 (100ms)
+├── task_pwm.h/cpp           # PWM 输出任务 (50ms, 斜坡逼近)
+├── task_ui.h/cpp            # OLED 显示任务 (100ms, 脏标记优化)
+└── task_button.h/cpp        # 按钮输入任务 (20ms, 60ms 消抖)
 ```
 
 ### FreeRTOS 任务一览
 
 | 任务 | 周期 | 栈 (B) | 优先级 | 职责 |
 |------|------|--------|--------|------|
-| bt_rx | 10ms | 4096 | 3 | 轮询蓝牙缓冲区，提取完整帧，校验和验证，按帧类型路由（含 MODE/FREQ/DUTY_SET） |
-| bt_tx | 50ms | 4096 | 2 | 处理 tx_queue 中的 ACK/NACK 待发送帧，响应查询，每 2 秒自动遥测 |
-| control | 100ms | 3072 | 3 | 读温度取最大值，Catmull-Rom 样条查表，Gamma 校正模式映射，写入 target_duty |
-| pwm | 50ms | 2048 | 2 | 斜坡逼近 target_duty（每周期 ±3 步）；safety_override 时强制保持 255 |
+| bt_rx | 10ms | 4096 | 3 | 轮询蓝牙缓冲区，提取完整帧，校验和验证，按帧类型路由 |
+| bt_tx | 50ms | 4096 | 2 | 处理 tx_queue 中的 ACK/NACK 待发送帧，每 2 秒自动遥测 |
+| control | 100ms | 3072 | 3 | 读温度取最大值，Catmull-Rom 样条查表，Gamma 校正模式映射 |
+| pwm | 50ms | 2048 | 2 | 斜坡逼近 target_duty（每周期 ±3 步） |
 | ui | 100ms | 4096 | 1 | OLED 四象限刷新，display_dirty + 各路独立超时判定触发 |
 | button | 20ms | 2048 | 3 | 5 按钮读取 + 60ms 消抖 + 按键事件分发 |
-| safety | 1s | 2048 | 2 | ESP32 任务看门狗 (5s panic) + 核心任务心跳监控 (3s) + 安全覆盖 (safety_override 持久锁) |
+| safety | 1s | 2048 | 2 | 任务看门狗 (5s panic) + 心跳监控 (3s) + 安全覆盖 |
 
 ### 硬件连接
 
 | ESP32 GPIO | 连接 |
 |------------|------|
 | 5 | PWM 风扇控制信号 (25kHz, 8-bit) |
-| 12 | 按钮 0 — 模式切换 (静音→正常→Turbo→手动) |
+| 12 | 按钮 0 — 模式切换 |
 | 13 | 按钮 1 — PWM 频率 +200Hz |
 | 14 | 按钮 2 — PWM 频率 -200Hz |
 | 15 | 按钮 3 — 占空比 +10% (仅手动模式) |
@@ -188,21 +133,14 @@ firmware/
 
 | 模式 | 编号 | Gamma γ | 效果 |
 |------|------|---------|------|
-| 静音 Quiet | 1 | 1.6 | 低负载极安静，高负载仍有散热（高温不限流） |
+| 静音 Quiet | 1 | 1.6 | 低负载极安静，高负载仍有散热 |
 | 正常 Normal | 2 | 1.2 | 略偏静音，全程平滑线性加速 |
 | Turbo | 3 | 0.85 | 提前提速响应，高温段精细控制 |
-| 手动 Manual | 4 | — | 按钮或远程 DUTY_SET 直接调节占空比（±10%），控制任务不干预 |
+| 手动 Manual | 4 | — | 按钮或远程直接调节占空比（±10%） |
 
-### 占空比映射（Gamma 校正）
+占空比通过幂函数 `duty = 255 × (pct/100)^γ` 计算（Gamma 校正）。
 
-占空比通过幂函数 `duty = 255 × (pct/100)^γ` 计算，替代旧的线性乘系数方案。
-Gamma > 1 意味着低转速区分辨率更高（噪声变化更灵敏的区域），同时保证高温时转速不被过度压低。
-
-### 默认风扇曲线（7 点）
-
-编译期默认值，运行时可通过 FCURVE_SET 协议在线覆盖（最多 10 点）。
-
-控制任务使用 **Catmull-Rom 样条插值**（C1 连续）计算中间温度对应的目标占空比，确保风扇加减速无斜率突变，听感平滑。
+### 默认风扇曲线
 
 | 温度 (°C) | 占空比 (%) |
 |-----------|------------|
@@ -214,11 +152,13 @@ Gamma > 1 意味着低转速区分辨率更高（噪声变化更灵敏的区域�
 | 90.0 | 95 |
 | 100.0 | 100 |
 
+控制任务使用 **Catmull-Rom 样条插值**（C1 连续）计算中间温度对应的目标占空比。
+
 ### 安全机制（三层防护）
 
 1. **ESP32 任务看门狗** (5s) — 系统死锁时自动复位
-2. **任务心跳监控** (3s) — 核心任务 (bt_rx / control / pwm) 任意卡死，设置 `safety_override` 标志，PWM 任务在所有后续周期强制保持 255（不会被斜坡逻辑撤销），仅复位可清除
-3. **温度数据超时** (5s) — 各路温度源独立判定 (`last_cpu_ms` / `last_gpu_ms`)，单一数据源失效不导致整体强制全速。双路均失效时 `effective_temp = 100°C`，风扇全速
+2. **任务心跳监控** (3s) — 核心任务卡死时设置 `safety_override`，PWM 强制保持 255
+3. **温度数据超时** (5s) — 各路温度源独立判定，双路均失效时 `effective_temp = 100°C`
 
 ---
 
@@ -232,7 +172,7 @@ Gamma > 1 意味着低转速区分辨率更高（噪声变化更灵敏的区域�
 
 ### ESP32 固件
 
-1. Arduino IDE（打开 `firmware.ino`）或 PlatformIO
+1. Arduino IDE 打开 `firmware/firmware.ino`
 2. 库依赖：**Adafruit SSD1306** (^2.5.7)、**Adafruit GFX Library** (^1.11.9)
 3. 开发板选 ESP32 Dev Module
 4. 编译、烧录
@@ -246,27 +186,8 @@ Gamma > 1 意味着低转速区分辨率更高（噪声变化更灵敏的区域�
 5. 仪表盘开始显示 ESP32 遥测数据，OLED 显示 CPU/GPU 温度
 6. 使用远程控制按钮或物理按钮调节模式/频率/占空比
 
-### 串口调试
-
-ESP32 的 USB 串口 (115200 baud) 输出运行日志，每 10 秒打印一次状态。启动时应看到：
-
-```
-============================================
-  ESP32 Fan Controller - Production FW v3.0
-============================================
-[INIT] Bluetooth started
-[INIT] PWM initialized @ 25kHz
-[INIT] Buttons initialized
-[INIT] OLED initialized
-[INIT] TX queue created
-[INIT] All tasks started successfully
-[STATUS] Mode=2 Duty=65% Target=65% CPU=55.2 GPU=48.0 Max=55.2 CurvePts=7
-```
-
 ---
 
 ## 致谢
-
-本项目 v3.0 重构（通信协议升级、代码分层架构、UI 改版、文档编写）由 AI 辅助完成。
 
 原始项目：[垃圾研究社](https://space.bilibili.com/376404862) | [Payton9000/Hardware-Monitor](https://github.com/Payton9000/Hardware-Monitor)
