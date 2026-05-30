@@ -152,7 +152,7 @@ namespace CPUwenduhuoqu
                 {
                     int idx = aida.CpuSensors.IndexOf(match);
                     comboBoxChooseCpuMonitor.SelectedIndex = idx;
-                    aida.SelectCpuSensor(match.valueName);
+                    aida.SelectSensors(match.valueName, aida.GpuSensorName);
                 }
             }
             if (!string.IsNullOrEmpty(lastGpu))
@@ -162,7 +162,7 @@ namespace CPUwenduhuoqu
                 {
                     int idx = aida.GpuSensors.IndexOf(match);
                     comboBoxChooseGpuMonitor.SelectedIndex = idx;
-                    aida.SelectGpuSensor(match.valueName);
+                    aida.SelectSensors(aida.CpuSensorName, match.valueName);
                 }
             }
         }
@@ -315,11 +315,11 @@ namespace CPUwenduhuoqu
 
                 AppendStatusLog($"RX: {frame}");
 
-                var status = Protocol.TryParseStatus(frame);
-                if (status != null)
-                {
-                    UpdateDashboard(status.Value);
-                }
+                StatusData status;
+                if (Protocol.TryParseStatusResponse(frame, out status))
+                    {
+                        UpdateDashboard(status);
+                    }
             }));
         }
 
@@ -336,9 +336,9 @@ namespace CPUwenduhuoqu
             {
                 if (row.IsNewRow) continue;
                 if (float.TryParse(row.Cells[0].Value?.ToString(), out float temp) &&
-                    float.TryParse(row.Cells[1].Value?.ToString(), out float duty))
+                    byte.TryParse(row.Cells[1].Value?.ToString(), out byte duty))
                 {
-                    points.Add(new FanCurvePoint { TempC = temp, DutyPercent = duty });
+                    points.Add(new FanCurvePoint { Temperature = temp, DutyPercent = duty });
                 }
             }
 
@@ -348,14 +348,14 @@ namespace CPUwenduhuoqu
                 return;
             }
 
-            Task.Run(() => _serialService.Send(Protocol.BuildCurveSet(points)));
+            Task.Run(() => _serialService.Send(Protocol.BuildFcurveSet(points.ToArray())));
             AppendStatusLog($"TX: 风扇曲线已发送 ({points.Count} 点)");
         }
 
         private void BtnReadCurve_Click(object sender, EventArgs e)
         {
             if (!CheckConnected()) return;
-            Task.Run(() => _serialService.Send(Protocol.BuildCurveQuery()));
+            Task.Run(() => _serialService.Send(Protocol.BuildFcurveQuery()));
         }
 
         private void BtnQueryStatus_Click(object sender, EventArgs e)
