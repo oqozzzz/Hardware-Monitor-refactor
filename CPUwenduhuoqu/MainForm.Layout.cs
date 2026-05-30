@@ -111,36 +111,28 @@ namespace CPUwenduhuoqu
 
             // cpuTempLabel
             cpuTempLabel.AutoSize = true;
-            cpuTempLabel.Location = new Point(18, 12);
             cpuTempLabel.Margin = new Padding(4, 0, 4, 0);
             cpuTempLabel.Name = "cpuTempLabel";
-            cpuTempLabel.Size = new Size(98, 18);
             cpuTempLabel.TabIndex = 0;
             cpuTempLabel.Text = "CPU 温度: ";
 
             // gpuTempLabel
             gpuTempLabel.AutoSize = true;
-            gpuTempLabel.Location = new Point(18, 48);
             gpuTempLabel.Margin = new Padding(4, 0, 4, 0);
             gpuTempLabel.Name = "gpuTempLabel";
-            gpuTempLabel.Size = new Size(98, 18);
             gpuTempLabel.TabIndex = 1;
             gpuTempLabel.Text = "GPU 温度: ";
 
             // comboBoxSerialPorts
             comboBoxSerialPorts.DropDownStyle = ComboBoxStyle.DropDownList;
             comboBoxSerialPorts.FormattingEnabled = true;
-            comboBoxSerialPorts.Location = new Point(13, 84);
             comboBoxSerialPorts.Margin = new Padding(4);
             comboBoxSerialPorts.Name = "comboBoxSerialPorts";
-            comboBoxSerialPorts.Size = new Size(180, 26);
             comboBoxSerialPorts.TabIndex = 2;
 
             // buttonConnect
-            buttonConnect.Location = new Point(218, 78);
             buttonConnect.Margin = new Padding(4);
             buttonConnect.Name = "buttonConnect";
-            buttonConnect.Size = new Size(112, 36);
             buttonConnect.TabIndex = 3;
             buttonConnect.Text = "连接";
             buttonConnect.UseVisualStyleBackColor = true;
@@ -148,16 +140,13 @@ namespace CPUwenduhuoqu
 
             // labelConnectionStatus
             labelConnectionStatus.AutoSize = true;
-            labelConnectionStatus.Location = new Point(353, 89);
             labelConnectionStatus.Margin = new Padding(4, 0, 4, 0);
             labelConnectionStatus.Name = "labelConnectionStatus";
-            labelConnectionStatus.Size = new Size(116, 18);
             labelConnectionStatus.TabIndex = 4;
             labelConnectionStatus.Text = "已断开";
 
             // checkBoxUseAida64Mode
             checkBoxUseAida64Mode.AutoSize = true;
-            checkBoxUseAida64Mode.Location = new Point(12, 177);
             checkBoxUseAida64Mode.Name = "checkBoxUseAida64Mode";
             checkBoxUseAida64Mode.Size = new Size(376, 22);
             checkBoxUseAida64Mode.TabIndex = 5;
@@ -170,9 +159,7 @@ namespace CPUwenduhuoqu
             comboBoxChooseCpuMonitor.Enabled = false;
             comboBoxChooseCpuMonitor.ForeColor = Color.Black;
             comboBoxChooseCpuMonitor.FormattingEnabled = true;
-            comboBoxChooseCpuMonitor.Location = new Point(12, 247);
             comboBoxChooseCpuMonitor.Name = "comboBoxChooseCpuMonitor";
-            comboBoxChooseCpuMonitor.Size = new Size(193, 26);
             comboBoxChooseCpuMonitor.TabIndex = 7;
 
             // comboBoxChooseGpuMonitor
@@ -180,34 +167,26 @@ namespace CPUwenduhuoqu
             comboBoxChooseGpuMonitor.Enabled = false;
             comboBoxChooseGpuMonitor.ForeColor = Color.Black;
             comboBoxChooseGpuMonitor.FormattingEnabled = true;
-            comboBoxChooseGpuMonitor.Location = new Point(262, 247);
             comboBoxChooseGpuMonitor.Name = "comboBoxChooseGpuMonitor";
-            comboBoxChooseGpuMonitor.Size = new Size(188, 26);
             comboBoxChooseGpuMonitor.TabIndex = 7;
 
             // labelNoticeCpuMonitor
             labelNoticeCpuMonitor.AutoSize = true;
             labelNoticeCpuMonitor.ForeColor = Color.Gray;
-            labelNoticeCpuMonitor.Location = new Point(17, 216);
             labelNoticeCpuMonitor.Name = "labelNoticeCpuMonitor";
-            labelNoticeCpuMonitor.Size = new Size(188, 18);
             labelNoticeCpuMonitor.TabIndex = 8;
             labelNoticeCpuMonitor.Text = " 选择CPU温度传感器";
 
             // labelNoticeGpuMonitor
             labelNoticeGpuMonitor.AutoSize = true;
             labelNoticeGpuMonitor.ForeColor = Color.Gray;
-            labelNoticeGpuMonitor.Location = new Point(262, 216);
             labelNoticeGpuMonitor.Name = "labelNoticeGpuMonitor";
-            labelNoticeGpuMonitor.Size = new Size(188, 18);
             labelNoticeGpuMonitor.TabIndex = 9;
             labelNoticeGpuMonitor.Text = " 选择GPU温度传感器";
 
             // buttonUseChosenMonitor
             buttonUseChosenMonitor.Enabled = false;
-            buttonUseChosenMonitor.Location = new Point(470, 239);
             buttonUseChosenMonitor.Name = "buttonUseChosenMonitor";
-            buttonUseChosenMonitor.Size = new Size(122, 40);
             buttonUseChosenMonitor.TabIndex = 10;
             buttonUseChosenMonitor.Text = "确认";
             buttonUseChosenMonitor.UseVisualStyleBackColor = true;
@@ -218,7 +197,6 @@ namespace CPUwenduhuoqu
             statusStrip.Items.AddRange(new ToolStripItem[] {
                 toolStripStatusAida64CpuMonitor,
                 toolStripStatusAida64GpuMonitor });
-            statusStrip.Location = new Point(0, 283);
             statusStrip.Name = "statusStrip";
             statusStrip.Size = new Size(673, 31);
             statusStrip.TabIndex = 11;
@@ -237,15 +215,11 @@ namespace CPUwenduhuoqu
             toolStripStatusAida64GpuMonitor.Text = "AIDA64 GPU 传感器: ";
 
             // domainUpDownSelectRefreshTime
-            domainUpDownSelectRefreshTime.Location = new Point(265, 139);
             domainUpDownSelectRefreshTime.Name = "domainUpDownSelectRefreshTime";
-            domainUpDownSelectRefreshTime.Size = new Size(185, 28);
             domainUpDownSelectRefreshTime.TabIndex = 12;
 
             // buttonConfirmRefreshTime
-            buttonConfirmRefreshTime.Location = new Point(470, 130);
             buttonConfirmRefreshTime.Name = "buttonConfirmRefreshTime";
-            buttonConfirmRefreshTime.Size = new Size(122, 40);
             buttonConfirmRefreshTime.TabIndex = 13;
             buttonConfirmRefreshTime.Text = "确认";
             buttonConfirmRefreshTime.UseVisualStyleBackColor = true;
@@ -253,9 +227,7 @@ namespace CPUwenduhuoqu
 
             // labelNoticeRefreshTimeAdjustmentWindow
             labelNoticeRefreshTimeAdjustmentWindow.AutoSize = true;
-            labelNoticeRefreshTimeAdjustmentWindow.Location = new Point(10, 141);
             labelNoticeRefreshTimeAdjustmentWindow.Name = "labelNoticeRefreshTimeAdjustmentWindow";
-            labelNoticeRefreshTimeAdjustmentWindow.Size = new Size(242, 18);
             labelNoticeRefreshTimeAdjustmentWindow.TabIndex = 14;
             labelNoticeRefreshTimeAdjustmentWindow.Text = "选择刷新时间（3-30s）";
 
