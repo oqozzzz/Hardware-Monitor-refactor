@@ -1,4 +1,5 @@
-using System;
+﻿using System;
+using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
 using CPUwenduhuoqu.Communication;
@@ -7,6 +8,34 @@ namespace CPUwenduhuoqu
 {
     partial class MainForm
     {
+        // ====================================================================
+        // 原 Designer.cs 字段声明
+        // ====================================================================
+
+        private IContainer components = null;
+        private Label cpuTempLabel;
+        private Label gpuTempLabel;
+        private ComboBox comboBoxSerialPorts;
+        private Button buttonConnect;
+        private Label labelConnectionStatus;
+        private CheckBox checkBoxUseAida64Mode;
+        private ComboBox comboBoxChooseCpuMonitor;
+        private ComboBox comboBoxChooseGpuMonitor;
+        private Label labelNoticeCpuMonitor;
+        private Label labelNoticeGpuMonitor;
+        private Button buttonUseChosenMonitor;
+        private StatusStrip statusStrip;
+        private ToolStripStatusLabel toolStripStatusAida64CpuMonitor;
+        private ToolStripStatusLabel toolStripStatusAida64GpuMonitor;
+        private DomainUpDown domainUpDownSelectRefreshTime;
+        private Button buttonConfirmRefreshTime;
+        private Label labelNoticeRefreshTimeAdjustmentWindow;
+        private NotifyIcon notifyIcon;
+
+        // ====================================================================
+        // Layout.cs 字段声明
+        // ====================================================================
+
         // 固件状态区
         private GroupBox _grpEsp32;
         private Panel _dashboardPanel;
@@ -34,12 +63,242 @@ namespace CPUwenduhuoqu
         private Button _btnQueryStatus;
 
         // ====================================================================
+        // Dispose
+        // ====================================================================
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing && (components != null))
+            {
+                components.Dispose();
+            }
+            base.Dispose(disposing);
+        }
+
+        // ====================================================================
         // UI 布局入口
-        // 窗体 720×608，所有控件精确定位，保证文字完整显示 + 元素间距 ≥ 6px
         // ====================================================================
 
         private void BuildUi()
         {
+            // ---- 控件实例化 ----
+            components = new Container();
+            ComponentResourceManager resources = new ComponentResourceManager(typeof(MainForm));
+
+            cpuTempLabel = new Label();
+            gpuTempLabel = new Label();
+            comboBoxSerialPorts = new ComboBox();
+            buttonConnect = new Button();
+            labelConnectionStatus = new Label();
+            checkBoxUseAida64Mode = new CheckBox();
+            comboBoxChooseCpuMonitor = new ComboBox();
+            comboBoxChooseGpuMonitor = new ComboBox();
+            labelNoticeCpuMonitor = new Label();
+            labelNoticeGpuMonitor = new Label();
+            buttonUseChosenMonitor = new Button();
+            statusStrip = new StatusStrip();
+            toolStripStatusAida64CpuMonitor = new ToolStripStatusLabel();
+            toolStripStatusAida64GpuMonitor = new ToolStripStatusLabel();
+            domainUpDownSelectRefreshTime = new DomainUpDown();
+            buttonConfirmRefreshTime = new Button();
+            labelNoticeRefreshTimeAdjustmentWindow = new Label();
+            notifyIcon = new NotifyIcon(components);
+
+            statusStrip.SuspendLayout();
+            SuspendLayout();
+
+            // ---- 基础控件属性设置 ----
+
+            // cpuTempLabel
+            cpuTempLabel.AutoSize = true;
+            cpuTempLabel.Location = new Point(18, 12);
+            cpuTempLabel.Margin = new Padding(4, 0, 4, 0);
+            cpuTempLabel.Name = "cpuTempLabel";
+            cpuTempLabel.Size = new Size(98, 18);
+            cpuTempLabel.TabIndex = 0;
+            cpuTempLabel.Text = "CPU 温度: ";
+
+            // gpuTempLabel
+            gpuTempLabel.AutoSize = true;
+            gpuTempLabel.Location = new Point(18, 48);
+            gpuTempLabel.Margin = new Padding(4, 0, 4, 0);
+            gpuTempLabel.Name = "gpuTempLabel";
+            gpuTempLabel.Size = new Size(98, 18);
+            gpuTempLabel.TabIndex = 1;
+            gpuTempLabel.Text = "GPU 温度: ";
+
+            // comboBoxSerialPorts
+            comboBoxSerialPorts.DropDownStyle = ComboBoxStyle.DropDownList;
+            comboBoxSerialPorts.FormattingEnabled = true;
+            comboBoxSerialPorts.Location = new Point(13, 84);
+            comboBoxSerialPorts.Margin = new Padding(4);
+            comboBoxSerialPorts.Name = "comboBoxSerialPorts";
+            comboBoxSerialPorts.Size = new Size(180, 26);
+            comboBoxSerialPorts.TabIndex = 2;
+
+            // buttonConnect
+            buttonConnect.Location = new Point(218, 78);
+            buttonConnect.Margin = new Padding(4);
+            buttonConnect.Name = "buttonConnect";
+            buttonConnect.Size = new Size(112, 36);
+            buttonConnect.TabIndex = 3;
+            buttonConnect.Text = "连接";
+            buttonConnect.UseVisualStyleBackColor = true;
+            buttonConnect.Click += new EventHandler(buttonConnect_Click);
+
+            // labelConnectionStatus
+            labelConnectionStatus.AutoSize = true;
+            labelConnectionStatus.Location = new Point(353, 89);
+            labelConnectionStatus.Margin = new Padding(4, 0, 4, 0);
+            labelConnectionStatus.Name = "labelConnectionStatus";
+            labelConnectionStatus.Size = new Size(116, 18);
+            labelConnectionStatus.TabIndex = 4;
+            labelConnectionStatus.Text = "已断开";
+
+            // checkBoxUseAida64Mode
+            checkBoxUseAida64Mode.AutoSize = true;
+            checkBoxUseAida64Mode.Location = new Point(12, 177);
+            checkBoxUseAida64Mode.Name = "checkBoxUseAida64Mode";
+            checkBoxUseAida64Mode.Size = new Size(376, 22);
+            checkBoxUseAida64Mode.TabIndex = 5;
+            checkBoxUseAida64Mode.Text = "使用AIDA64获取硬件温度信息";
+            checkBoxUseAida64Mode.UseVisualStyleBackColor = true;
+            checkBoxUseAida64Mode.CheckedChanged += new EventHandler(checkBox_useAida64Mode);
+
+            // comboBoxChooseCpuMonitor
+            comboBoxChooseCpuMonitor.DropDownStyle = ComboBoxStyle.DropDownList;
+            comboBoxChooseCpuMonitor.Enabled = false;
+            comboBoxChooseCpuMonitor.ForeColor = Color.Black;
+            comboBoxChooseCpuMonitor.FormattingEnabled = true;
+            comboBoxChooseCpuMonitor.Location = new Point(12, 247);
+            comboBoxChooseCpuMonitor.Name = "comboBoxChooseCpuMonitor";
+            comboBoxChooseCpuMonitor.Size = new Size(193, 26);
+            comboBoxChooseCpuMonitor.TabIndex = 7;
+
+            // comboBoxChooseGpuMonitor
+            comboBoxChooseGpuMonitor.DropDownStyle = ComboBoxStyle.DropDownList;
+            comboBoxChooseGpuMonitor.Enabled = false;
+            comboBoxChooseGpuMonitor.ForeColor = Color.Black;
+            comboBoxChooseGpuMonitor.FormattingEnabled = true;
+            comboBoxChooseGpuMonitor.Location = new Point(262, 247);
+            comboBoxChooseGpuMonitor.Name = "comboBoxChooseGpuMonitor";
+            comboBoxChooseGpuMonitor.Size = new Size(188, 26);
+            comboBoxChooseGpuMonitor.TabIndex = 7;
+
+            // labelNoticeCpuMonitor
+            labelNoticeCpuMonitor.AutoSize = true;
+            labelNoticeCpuMonitor.ForeColor = Color.Gray;
+            labelNoticeCpuMonitor.Location = new Point(17, 216);
+            labelNoticeCpuMonitor.Name = "labelNoticeCpuMonitor";
+            labelNoticeCpuMonitor.Size = new Size(188, 18);
+            labelNoticeCpuMonitor.TabIndex = 8;
+            labelNoticeCpuMonitor.Text = " 选择CPU温度传感器";
+
+            // labelNoticeGpuMonitor
+            labelNoticeGpuMonitor.AutoSize = true;
+            labelNoticeGpuMonitor.ForeColor = Color.Gray;
+            labelNoticeGpuMonitor.Location = new Point(262, 216);
+            labelNoticeGpuMonitor.Name = "labelNoticeGpuMonitor";
+            labelNoticeGpuMonitor.Size = new Size(188, 18);
+            labelNoticeGpuMonitor.TabIndex = 9;
+            labelNoticeGpuMonitor.Text = " 选择GPU温度传感器";
+
+            // buttonUseChosenMonitor
+            buttonUseChosenMonitor.Enabled = false;
+            buttonUseChosenMonitor.Location = new Point(470, 239);
+            buttonUseChosenMonitor.Name = "buttonUseChosenMonitor";
+            buttonUseChosenMonitor.Size = new Size(122, 40);
+            buttonUseChosenMonitor.TabIndex = 10;
+            buttonUseChosenMonitor.Text = "确认";
+            buttonUseChosenMonitor.UseVisualStyleBackColor = true;
+            buttonUseChosenMonitor.Click += new EventHandler(buttonUseChosenMonitor_Click);
+
+            // statusStrip
+            statusStrip.ImageScalingSize = new Size(24, 24);
+            statusStrip.Items.AddRange(new ToolStripItem[] {
+                toolStripStatusAida64CpuMonitor,
+                toolStripStatusAida64GpuMonitor });
+            statusStrip.Location = new Point(0, 283);
+            statusStrip.Name = "statusStrip";
+            statusStrip.Size = new Size(673, 31);
+            statusStrip.TabIndex = 11;
+            statusStrip.Text = "statusStrip1";
+
+            // toolStripStatusAida64CpuMonitor
+            toolStripStatusAida64CpuMonitor.ForeColor = Color.Gray;
+            toolStripStatusAida64CpuMonitor.Name = "toolStripStatusAida64CpuMonitor";
+            toolStripStatusAida64CpuMonitor.Size = new Size(202, 24);
+            toolStripStatusAida64CpuMonitor.Text = "AIDA64 CPU 传感器: ";
+
+            // toolStripStatusAida64GpuMonitor
+            toolStripStatusAida64GpuMonitor.ForeColor = Color.Gray;
+            toolStripStatusAida64GpuMonitor.Name = "toolStripStatusAida64GpuMonitor";
+            toolStripStatusAida64GpuMonitor.Size = new Size(203, 24);
+            toolStripStatusAida64GpuMonitor.Text = "AIDA64 GPU 传感器: ";
+
+            // domainUpDownSelectRefreshTime
+            domainUpDownSelectRefreshTime.Location = new Point(265, 139);
+            domainUpDownSelectRefreshTime.Name = "domainUpDownSelectRefreshTime";
+            domainUpDownSelectRefreshTime.Size = new Size(185, 28);
+            domainUpDownSelectRefreshTime.TabIndex = 12;
+
+            // buttonConfirmRefreshTime
+            buttonConfirmRefreshTime.Location = new Point(470, 130);
+            buttonConfirmRefreshTime.Name = "buttonConfirmRefreshTime";
+            buttonConfirmRefreshTime.Size = new Size(122, 40);
+            buttonConfirmRefreshTime.TabIndex = 13;
+            buttonConfirmRefreshTime.Text = "确认";
+            buttonConfirmRefreshTime.UseVisualStyleBackColor = true;
+            buttonConfirmRefreshTime.Click += new EventHandler(buttonConfirmRefreshTime_Click);
+
+            // labelNoticeRefreshTimeAdjustmentWindow
+            labelNoticeRefreshTimeAdjustmentWindow.AutoSize = true;
+            labelNoticeRefreshTimeAdjustmentWindow.Location = new Point(10, 141);
+            labelNoticeRefreshTimeAdjustmentWindow.Name = "labelNoticeRefreshTimeAdjustmentWindow";
+            labelNoticeRefreshTimeAdjustmentWindow.Size = new Size(242, 18);
+            labelNoticeRefreshTimeAdjustmentWindow.TabIndex = 14;
+            labelNoticeRefreshTimeAdjustmentWindow.Text = "选择刷新时间（3-30s）";
+
+            // notifyIcon
+            notifyIcon.Text = "硬件温度监测";
+            notifyIcon.Icon = Properties.Resources.MainIcon;
+            notifyIcon.Visible = false;
+            notifyIcon.Click += new EventHandler(NotifyIcon_Click);
+
+            // ---- 窗体属性 ----
+            AutoScaleDimensions = new SizeF(9F, 18F);
+            AutoScaleMode = AutoScaleMode.Font;
+            ClientSize = new Size(720, 360);
+            Controls.Add(labelNoticeRefreshTimeAdjustmentWindow);
+            Controls.Add(buttonConfirmRefreshTime);
+            Controls.Add(domainUpDownSelectRefreshTime);
+            Controls.Add(statusStrip);
+            Controls.Add(buttonUseChosenMonitor);
+            Controls.Add(labelNoticeGpuMonitor);
+            Controls.Add(labelNoticeCpuMonitor);
+            Controls.Add(comboBoxChooseGpuMonitor);
+            Controls.Add(comboBoxChooseCpuMonitor);
+            Controls.Add(checkBoxUseAida64Mode);
+            Controls.Add(labelConnectionStatus);
+            Controls.Add(buttonConnect);
+            Controls.Add(comboBoxSerialPorts);
+            Controls.Add(gpuTempLabel);
+            Controls.Add(cpuTempLabel);
+            Icon = (Icon)(resources.GetObject("$this.Icon"));
+            Margin = new Padding(4);
+            Name = "MainForm";
+            Text = "硬件温度监测";
+            FormClosing += new FormClosingEventHandler(MainForm_FormClosing);
+            Load += new EventHandler(MainForm_Load);
+            FormBorderStyle = FormBorderStyle.FixedDialog;
+            Resize += new EventHandler(MainForm_Resize);
+            MaximizeBox = false;
+            statusStrip.ResumeLayout(false);
+            statusStrip.PerformLayout();
+            ResumeLayout(false);
+            PerformLayout();
+
+            // ---- 最终布局覆盖 ----
             this.ClientSize = new Size(720, 630);
             this.Font = new Font("Microsoft YaHei UI", 9F);
 

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Drawing;
 using System.IO.Ports;
 using System.Linq;
@@ -22,7 +22,6 @@ namespace CPUwenduhuoqu
 
         public MainForm()
         {
-            InitializeComponent();
             BuildUi();
         }
 
