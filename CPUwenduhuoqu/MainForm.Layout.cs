@@ -136,7 +136,7 @@ namespace CPUwenduhuoqu
             buttonConnect.TabIndex = 3;
             buttonConnect.Text = "连接";
             buttonConnect.UseVisualStyleBackColor = true;
-            buttonConnect.Click += new EventHandler(buttonConnect_Click);
+            buttonConnect.Click += buttonConnect_Click;
 
             // labelConnectionStatus
             labelConnectionStatus.AutoSize = true;
@@ -152,7 +152,7 @@ namespace CPUwenduhuoqu
             checkBoxUseAida64Mode.TabIndex = 5;
             checkBoxUseAida64Mode.Text = "使用AIDA64获取硬件温度信息";
             checkBoxUseAida64Mode.UseVisualStyleBackColor = true;
-            checkBoxUseAida64Mode.CheckedChanged += new EventHandler(checkBox_useAida64Mode);
+            checkBoxUseAida64Mode.CheckedChanged += checkBox_useAida64Mode;
 
             // comboBoxChooseCpuMonitor
             comboBoxChooseCpuMonitor.DropDownStyle = ComboBoxStyle.DropDownList;
@@ -190,7 +190,7 @@ namespace CPUwenduhuoqu
             buttonUseChosenMonitor.TabIndex = 10;
             buttonUseChosenMonitor.Text = "确认";
             buttonUseChosenMonitor.UseVisualStyleBackColor = true;
-            buttonUseChosenMonitor.Click += new EventHandler(buttonUseChosenMonitor_Click);
+            buttonUseChosenMonitor.Click += buttonUseChosenMonitor_Click;
 
             // statusStrip
             statusStrip.ImageScalingSize = new Size(24, 24);
@@ -223,7 +223,7 @@ namespace CPUwenduhuoqu
             buttonConfirmRefreshTime.TabIndex = 13;
             buttonConfirmRefreshTime.Text = "确认";
             buttonConfirmRefreshTime.UseVisualStyleBackColor = true;
-            buttonConfirmRefreshTime.Click += new EventHandler(buttonConfirmRefreshTime_Click);
+            buttonConfirmRefreshTime.Click += buttonConfirmRefreshTime_Click;
 
             // labelNoticeRefreshTimeAdjustmentWindow
             labelNoticeRefreshTimeAdjustmentWindow.AutoSize = true;
@@ -235,7 +235,7 @@ namespace CPUwenduhuoqu
             notifyIcon.Text = "硬件温度监测";
             notifyIcon.Icon = Properties.Resources.MainIcon;
             notifyIcon.Visible = false;
-            notifyIcon.Click += new EventHandler(NotifyIcon_Click);
+            notifyIcon.Click += NotifyIcon_Click;
 
             // ---- 窗体属性 ----
             AutoScaleDimensions = new SizeF(9F, 18F);
@@ -260,10 +260,10 @@ namespace CPUwenduhuoqu
             Margin = new Padding(4);
             Name = "MainForm";
             Text = "硬件温度监测";
-            FormClosing += new FormClosingEventHandler(MainForm_FormClosing);
-            Load += new EventHandler(MainForm_Load);
+            FormClosing += MainForm_FormClosing;
+            Load += MainForm_Load;
             FormBorderStyle = FormBorderStyle.FixedDialog;
-            Resize += new EventHandler(MainForm_Resize);
+            Resize += MainForm_Resize;
             MaximizeBox = false;
             statusStrip.ResumeLayout(false);
             statusStrip.PerformLayout();
@@ -271,8 +271,8 @@ namespace CPUwenduhuoqu
             PerformLayout();
 
             // ---- 最终布局覆盖 ----
-            this.ClientSize = new Size(720, 630);
-            this.Font = new Font("Microsoft YaHei UI", 9F);
+            ClientSize = new Size(720, 630);
+            Font = new Font("Microsoft YaHei UI", 9F);
 
             RepositionDesignerControls();
             BuildEsp32Section();
@@ -305,7 +305,7 @@ namespace CPUwenduhuoqu
                 AutoSize = true,
                 Font = this.Font
             };
-            this.Controls.Add(_lblRefreshHint);
+            Controls.Add(_lblRefreshHint);
 
             domainUpDownSelectRefreshTime.Location = new Point(385, 40);
             domainUpDownSelectRefreshTime.Size = new Size(56, 26);
@@ -329,7 +329,7 @@ namespace CPUwenduhuoqu
                 _config.MinimizeToTray = _checkBoxMinimizeToTray.Checked;
                 _config.Save();
             };
-            this.Controls.Add(_checkBoxMinimizeToTray);
+            Controls.Add(_checkBoxMinimizeToTray);
 
             // Row 2b (y=104) AIDA64 传感器选择
             labelNoticeCpuMonitor.Text = "CPU传感器:";
@@ -512,7 +512,7 @@ namespace CPUwenduhuoqu
             _grpEsp32.Controls.Add(_btnToggleView);
             _grpEsp32.Controls.Add(_dashboardPanel);
             _grpEsp32.Controls.Add(_txtStatusLog);
-            this.Controls.Add(_grpEsp32);
+            Controls.Add(_grpEsp32);
         }
 
         // ---- 风扇曲线区 (y=330, h=240) ----
@@ -578,7 +578,7 @@ namespace CPUwenduhuoqu
             _grpFanCurve.Controls.Add(_btnSendCurve);
             _grpFanCurve.Controls.Add(_btnReadCurve);
             _grpFanCurve.Controls.Add(_btnQueryStatus);
-            this.Controls.Add(_grpFanCurve);
+            Controls.Add(_grpFanCurve);
         }
 
         // ---- 仪表盘辅助 ----
