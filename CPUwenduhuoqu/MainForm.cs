@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Drawing;
 using System.IO.Ports;
 using System.Linq;
@@ -17,13 +17,13 @@ namespace CPUwenduhuoqu
         private readonly AppConfigService _config = new AppConfigService();
         private System.Windows.Forms.Timer _updateTimer;
         private StatusData _lastStatus;
-
         private bool _isExiting;
 
         public MainForm()
         {
             InitializeComponent();
-            BuildUi();
+            BuildDashboard();
+            BuildFanCurveData();
         }
 
         // ====================================================================
@@ -32,6 +32,8 @@ namespace CPUwenduhuoqu
 
         private void MainForm_Load(object sender, EventArgs e)
         {
+            checkBoxMinimizeToTray.Checked = _config.MinimizeToTray;
+
             if (_config.UseAida64Mode)
                 SwitchToAida64();
             else
@@ -61,9 +63,9 @@ namespace CPUwenduhuoqu
             if (!_isExiting && _config.MinimizeToTray)
             {
                 e.Cancel = true;
-                this.WindowState = FormWindowState.Minimized;
-                this.Hide();
-                this.ShowInTaskbar = false;
+                WindowState = FormWindowState.Minimized;
+                Hide();
+                ShowInTaskbar = false;
                 return;
             }
 
@@ -88,25 +90,25 @@ namespace CPUwenduhuoqu
 
         private void MainForm_Resize(object sender, EventArgs e)
         {
-            if (this.WindowState == FormWindowState.Minimized)
+            if (WindowState == FormWindowState.Minimized)
             {
-                this.Hide();
-                this.notifyIcon.Visible = true;
+                Hide();
+                notifyIcon.Visible = true;
             }
         }
 
         private void NotifyIcon_Click(object sender, EventArgs e)
         {
-            this.Show();
-            this.WindowState = FormWindowState.Normal;
-            this.ShowInTaskbar = true;
+            Show();
+            WindowState = FormWindowState.Normal;
+            ShowInTaskbar = true;
         }
 
         private void OnExit(object sender, EventArgs e)
         {
             _isExiting = true;
             _config.Save();
-            this.Close();
+            Close();
         }
 
         // ====================================================================
@@ -146,16 +148,33 @@ namespace CPUwenduhuoqu
             if (!string.IsNullOrEmpty(lastCpu))
             {
                 var match = aida.CpuSensors.FirstOrDefault(s => s.valueName == lastCpu);
-                if (match.valueName != null) comboBoxChooseCpuMonitor.SelectedItem = match.displayName;
+                if (match.valueName != null)
+                {
+                    int idx = aida.CpuSensors.IndexOf(match);
+                    comboBoxChooseCpuMonitor.SelectedIndex = idx;
+                    aida.SelectSensors(match.valueName, aida.GpuSensorName);
+                }
             }
             if (!string.IsNullOrEmpty(lastGpu))
             {
                 var match = aida.GpuSensors.FirstOrDefault(s => s.valueName == lastGpu);
-                if (match.valueName != null) comboBoxChooseGpuMonitor.SelectedItem = match.displayName;
+                if (match.valueName != null)
+                {
+                    int idx = aida.GpuSensors.IndexOf(match);
+                    comboBoxChooseGpuMonitor.SelectedIndex = idx;
+                    aida.SelectSensors(aida.CpuSensorName, match.valueName);
+                }
             }
+        }
 
-            toolStripStatusAida64CpuMonitor.Text = "来源: AIDA64";
-            toolStripStatusAida64GpuMonitor.Text = "";
+        private bool CheckConnected()
+        {
+            if (_serialService == null || !_serialService.IsOpen)
+            {
+                MessageBox.Show("请先连接串口。", "提示", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return false;
+            }
+            return true;
         }
 
         // ====================================================================
@@ -235,9 +254,9 @@ namespace CPUwenduhuoqu
                 {
                     if (_serialService.Open(port))
                     {
-                        this.BeginInvoke(new Action(() =>
+                        BeginInvoke(new Action(() =>
                         {
-                            this.WindowState = FormWindowState.Minimized;
+                            WindowState = FormWindowState.Minimized;
                         }));
                     }
                 });
@@ -254,7 +273,7 @@ namespace CPUwenduhuoqu
                 Task.Run(() =>
                 {
                     _serialService.Close();
-                    this.BeginInvoke(new Action(() => buttonConnect.Enabled = true));
+                    BeginInvoke(new Action(() => buttonConnect.Enabled = true));
                 });
             }
             else if (comboBoxSerialPorts.SelectedItem != null)
@@ -264,7 +283,7 @@ namespace CPUwenduhuoqu
                 Task.Run(() =>
                 {
                     bool ok = _serialService.Open(port);
-                    this.BeginInvoke(new Action(() =>
+                    BeginInvoke(new Action(() =>
                     {
                         if (ok)
                         {
@@ -279,125 +298,80 @@ namespace CPUwenduhuoqu
 
         private void OnConnectionChanged(object s, bool connected)
         {
-            if (this.IsDisposed) return;
-            this.BeginInvoke(new Action(() =>
+            if (IsDisposed) return;
+            BeginInvoke(new Action(() =>
             {
-                if (this.IsDisposed) return;
+                if (IsDisposed) return;
                 labelConnectionStatus.Text = connected ? "已连接" : "已断开";
             }));
         }
 
         private void OnDataReceived(object s, string frame)
         {
-            if (this.IsDisposed) return;
-            this.BeginInvoke(new Action(() =>
+            if (IsDisposed) return;
+            BeginInvoke(new Action(() =>
             {
-                if (this.IsDisposed) return;
+                if (IsDisposed) return;
 
-                FrameType ft = Protocol.IdentifyFrame(frame);
-                switch (ft)
-                {
-                    case FrameType.StatusResponse:
-                        if (Protocol.TryParseStatusResponse(frame, out StatusData status))
-                        {
-                            UpdateDashboard(status);
-                            AppendStatusLog($"[状态] 模式={status.Mode} 风扇={status.DutyPercent}% " +
-                                $"频率={status.FreqHz}Hz CPU={status.CpuTemp}°C GPU={status.GpuTemp}°C");
-                        }
-                        break;
-                    case FrameType.FcurveResponse:
-                        if (Protocol.TryParseFcurveResponse(frame, out FanCurvePoint[] points))
-                        {
-                            _fanCurveGrid.Rows.Clear();
-                            foreach (var p in points)
-                                _fanCurveGrid.Rows.Add(p.Temperature, p.DutyPercent);
-                            AppendStatusLog($"[风扇曲线] 收到 {points.Length} 个点");
-                        }
-                        break;
-                    case FrameType.Ack:
-                        AppendStatusLog("[ACK] 风扇曲线已接受");
-                        break;
-                    case FrameType.Nack:
-                        if (Protocol.TryParseNack(frame, out int err))
-                            AppendStatusLog($"[NACK] 错误码: {err}");
-                        break;
-                }
+                AppendStatusLog($"RX: {frame}");
+
+                StatusData status;
+                if (Protocol.TryParseStatusResponse(frame, out status))
+                    {
+                        UpdateDashboard(status);
+                    }
             }));
         }
 
         // ====================================================================
-        // Fan Curve Buttons
+        // Fan Curve
         // ====================================================================
 
         private void BtnSendCurve_Click(object sender, EventArgs e)
         {
-            if (_serialService == null || !_serialService.IsOpen)
+            if (!CheckConnected()) return;
+
+            var points = new System.Collections.Generic.List<FanCurvePoint>();
+            foreach (DataGridViewRow row in fanCurveGrid.Rows)
             {
-                MessageBox.Show("未连接到设备。", "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                if (row.IsNewRow) continue;
+                if (float.TryParse(row.Cells[0].Value?.ToString(), out float temp) &&
+                    byte.TryParse(row.Cells[1].Value?.ToString(), out byte duty))
+                {
+                    points.Add(new FanCurvePoint { Temperature = temp, DutyPercent = duty });
+                }
+            }
+
+            if (points.Count == 0)
+            {
+                MessageBox.Show("风扇曲线为空。", "错误", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
-            try
-            {
-                var points = new FanCurvePoint[_fanCurveGrid.Rows.Count - 1];
-                for (int i = 0; i < points.Length; i++)
-                {
-                    var row = _fanCurveGrid.Rows[i];
-                    points[i] = new FanCurvePoint
-                    {
-                        Temperature = float.Parse(row.Cells[0].Value?.ToString() ?? "0"),
-                        DutyPercent = byte.Parse(row.Cells[1].Value?.ToString() ?? "0")
-                    };
-                }
-
-                string frame = Protocol.BuildFcurveSet(points);
-                Task.Run(() => _serialService.Send(frame));
-                AppendStatusLog("[发送] 风扇曲线已发送");
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"无效的曲线数据: {ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
+            Task.Run(() => _serialService.Send(Protocol.BuildFcurveSet(points.ToArray())));
+            AppendStatusLog($"TX: 风扇曲线已发送 ({points.Count} 点)");
         }
 
         private void BtnReadCurve_Click(object sender, EventArgs e)
         {
-            if (_serialService == null || !_serialService.IsOpen)
-            {
-                MessageBox.Show("未连接到设备。", "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
+            if (!CheckConnected()) return;
             Task.Run(() => _serialService.Send(Protocol.BuildFcurveQuery()));
         }
 
         private void BtnQueryStatus_Click(object sender, EventArgs e)
         {
-            if (_serialService == null || !_serialService.IsOpen)
-            {
-                MessageBox.Show("未连接到设备。", "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
+            if (!CheckConnected()) return;
             Task.Run(() => _serialService.Send(Protocol.BuildStatusQuery()));
         }
 
         // ====================================================================
-        // Remote Control Buttons (对应 ESP32 实体按键)
+        // Remote Control
         // ====================================================================
-
-        private bool CheckConnected()
-        {
-            if (_serialService == null || !_serialService.IsOpen)
-            {
-                MessageBox.Show("未连接到设备。", "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return false;
-            }
-            return true;
-        }
 
         private void BtnRemoteMode_Click(object sender, EventArgs e)
         {
             if (!CheckConnected()) return;
-            int nextMode = _lastStatus.Mode >= 4 ? 1 : _lastStatus.Mode + 1;
+            int nextMode = (_lastStatus.Mode % 4) + 1;
             Task.Run(() => _serialService.Send(Protocol.BuildModeSet(nextMode)));
         }
 
@@ -497,7 +471,7 @@ namespace CPUwenduhuoqu
         }
 
         // ====================================================================
-        // Refresh Time
+        // Refresh Time & Minimize
         // ====================================================================
 
         private void buttonConfirmRefreshTime_Click(object sender, EventArgs e)
@@ -510,6 +484,144 @@ namespace CPUwenduhuoqu
             else
             {
                 MessageBox.Show("请选择 3 到 30 秒之间的值。", "无效", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+        }
+
+        private void checkBoxMinimizeToTray_CheckedChanged(object sender, EventArgs e)
+        {
+            _config.MinimizeToTray = checkBoxMinimizeToTray.Checked;
+            _config.Save();
+        }
+
+        // ====================================================================
+        // Dashboard & Fan Curve Runtime Setup
+        // ====================================================================
+
+        private void BuildDashboard()
+        {
+            var headFont = new Font("Microsoft YaHei UI", 10F, FontStyle.Bold);
+            var tinyFont = new Font("Microsoft YaHei UI", 8F);
+
+            // Row A: 标题标签
+            DashLabel("模式:", 10, 8, headFont);
+            DashLabel("风扇:", 170, 8, headFont);
+            DashLabel("频率:", 330, 8, headFont);
+
+            // 分隔线
+            dashboardPanel.Controls.Add(new Label
+            {
+                Location = new Point(8, 36),
+                Size = new Size(666, 2),
+                BorderStyle = BorderStyle.Fixed3D
+            });
+
+            // Row B: CPU / GPU 标题
+            DashLabel("CPU:", 10, 50, headFont);
+            DashLabel("GPU:", 230, 50, headFont);
+
+            // Row C: 更新时间标题
+            DashLabel("最后更新:", 10, 82, tinyFont);
+
+            // 设置运行时字体
+            lblDashMode.Font = new Font("Consolas", 11F, FontStyle.Bold);
+            lblDashFan.Font = new Font("Consolas", 11F, FontStyle.Bold);
+            lblDashFreq.Font = new Font("Consolas", 11F, FontStyle.Bold);
+            lblDashCpuTemp.Font = new Font("Consolas", 11F, FontStyle.Bold);
+            lblDashGpuTemp.Font = new Font("Consolas", 11F, FontStyle.Bold);
+            lblDashCpuOk.Font = tinyFont;
+            lblDashGpuOk.Font = tinyFont;
+            lblDashUpdate.Font = tinyFont;
+
+            // 设置按钮字体
+            var btnFont = new Font("Microsoft YaHei UI", 8F);
+            btnRemoteMode.Font = btnFont;
+            btnRemoteFreqUp.Font = btnFont;
+            btnRemoteFreqDn.Font = btnFont;
+            btnRemoteDutyUp.Font = btnFont;
+            btnRemoteDutyDn.Font = btnFont;
+
+            // 日志文本框字体
+            txtStatusLog.Font = new Font("Consolas", 8F);
+        }
+
+        private void BuildFanCurveData()
+        {
+            fanCurveGrid.Columns.Add("TempCol", "温度 (°C)");
+            fanCurveGrid.Columns.Add("DutyCol", "占空比 (%)");
+            fanCurveGrid.Columns[0].Width = 105;
+            fanCurveGrid.Columns[1].Width = 105;
+            fanCurveGrid.Rows.Add(0.0f, 20);
+            fanCurveGrid.Rows.Add(35.0f, 25);
+            fanCurveGrid.Rows.Add(50.0f, 40);
+            fanCurveGrid.Rows.Add(65.0f, 70);
+            fanCurveGrid.Rows.Add(80.0f, 90);
+            fanCurveGrid.Rows.Add(100.0f, 100);
+        }
+
+        // ====================================================================
+        // Dashboard Helpers
+        // ====================================================================
+
+        private void DashLabel(string text, int x, int y, Font font)
+        {
+            dashboardPanel.Controls.Add(new Label
+            {
+                Text = text,
+                Location = new Point(x, y),
+                Font = font,
+                AutoSize = true
+            });
+        }
+
+        private void btnToggleView_Click(object sender, EventArgs e)
+        {
+            isDashboardMode = !isDashboardMode;
+            dashboardPanel.Visible = isDashboardMode;
+            txtStatusLog.Visible = !isDashboardMode;
+            btnToggleView.Text = isDashboardMode ? "日志模式" : "仪表盘";
+        }
+
+        // ====================================================================
+        // Data Update
+        // ====================================================================
+
+        private void UpdateDashboard(StatusData s)
+        {
+            if (!isDashboardMode) return;
+            _lastStatus = s;
+
+            string modeStr;
+            switch (s.Mode)
+            {
+                case 1: modeStr = "静音"; break;
+                case 2: modeStr = "正常"; break;
+                case 3: modeStr = "Turbo"; break;
+                case 4: modeStr = "手动"; break;
+                default: modeStr = "?"; break;
+            }
+            lblDashMode.Text = modeStr;
+            lblDashFan.Text = $"{s.DutyPercent}%";
+            lblDashFreq.Text = $"{s.FreqHz / 1000}kHz";
+            lblDashCpuTemp.Text = $"{s.CpuTemp:F1} °C";
+            lblDashGpuTemp.Text = $"{s.GpuTemp:F1} °C";
+
+            lblDashCpuOk.Text = s.CpuValid ? "✓" : "✗";
+            lblDashCpuOk.ForeColor = s.CpuValid ? Color.Green : Color.Red;
+            lblDashGpuOk.Text = s.GpuValid ? "✓" : "✗";
+            lblDashGpuOk.ForeColor = s.GpuValid ? Color.Green : Color.Red;
+
+            lblDashUpdate.Text = DateTime.Now.ToString("HH:mm:ss");
+        }
+
+        private void AppendStatusLog(string text)
+        {
+            txtStatusLog.AppendText(text + Environment.NewLine);
+            if (txtStatusLog.Lines.Length > 200)
+            {
+                var lines = txtStatusLog.Lines;
+                var recent = new string[100];
+                Array.Copy(lines, lines.Length - 100, recent, 0, 100);
+                txtStatusLog.Lines = recent;
             }
         }
     }
