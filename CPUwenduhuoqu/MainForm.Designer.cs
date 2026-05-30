@@ -64,490 +64,526 @@ namespace CPUwenduhuoqu
 
         private void InitializeComponent()
         {
-            components = new Container();
-            ComponentResourceManager resources = new ComponentResourceManager(typeof(MainForm));
+            this.components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
+            this.cpuTempLabel = new System.Windows.Forms.Label();
+            this.gpuTempLabel = new System.Windows.Forms.Label();
+            this.comboBoxSerialPorts = new System.Windows.Forms.ComboBox();
+            this.buttonConnect = new System.Windows.Forms.Button();
+            this.labelConnectionStatus = new System.Windows.Forms.Label();
+            this.checkBoxUseAida64Mode = new System.Windows.Forms.CheckBox();
+            this.comboBoxChooseCpuMonitor = new System.Windows.Forms.ComboBox();
+            this.comboBoxChooseGpuMonitor = new System.Windows.Forms.ComboBox();
+            this.labelNoticeCpuMonitor = new System.Windows.Forms.Label();
+            this.labelNoticeGpuMonitor = new System.Windows.Forms.Label();
+            this.buttonUseChosenMonitor = new System.Windows.Forms.Button();
+            this.statusStrip = new System.Windows.Forms.StatusStrip();
+            this.toolStripStatusAida64CpuMonitor = new System.Windows.Forms.ToolStripStatusLabel();
+            this.toolStripStatusAida64GpuMonitor = new System.Windows.Forms.ToolStripStatusLabel();
+            this.domainUpDownSelectRefreshTime = new System.Windows.Forms.DomainUpDown();
+            this.buttonConfirmRefreshTime = new System.Windows.Forms.Button();
+            this.labelNoticeRefreshTimeAdjustmentWindow = new System.Windows.Forms.Label();
+            this.notifyIcon = new System.Windows.Forms.NotifyIcon(this.components);
+            this.checkBoxMinimizeToTray = new System.Windows.Forms.CheckBox();
+            this.lblRefreshHint = new System.Windows.Forms.Label();
+            this.grpEsp32 = new System.Windows.Forms.GroupBox();
+            this.btnToggleView = new System.Windows.Forms.Button();
+            this.dashboardPanel = new System.Windows.Forms.Panel();
+            this.lblDashUpdate = new System.Windows.Forms.Label();
+            this.lblDashGpuOk = new System.Windows.Forms.Label();
+            this.lblDashGpuTemp = new System.Windows.Forms.Label();
+            this.lblDashCpuOk = new System.Windows.Forms.Label();
+            this.lblDashCpuTemp = new System.Windows.Forms.Label();
+            this.lblDashFreq = new System.Windows.Forms.Label();
+            this.lblDashFan = new System.Windows.Forms.Label();
+            this.lblDashMode = new System.Windows.Forms.Label();
+            this.btnRemoteDutyDn = new System.Windows.Forms.Button();
+            this.btnRemoteDutyUp = new System.Windows.Forms.Button();
+            this.btnRemoteFreqDn = new System.Windows.Forms.Button();
+            this.btnRemoteFreqUp = new System.Windows.Forms.Button();
+            this.btnRemoteMode = new System.Windows.Forms.Button();
+            this.txtStatusLog = new System.Windows.Forms.TextBox();
+            this.grpFanCurve = new System.Windows.Forms.GroupBox();
+            this.fanCurveGrid = new System.Windows.Forms.DataGridView();
+            this.btnSendCurve = new System.Windows.Forms.Button();
+            this.btnReadCurve = new System.Windows.Forms.Button();
+            this.btnQueryStatus = new System.Windows.Forms.Button();
+            this.statusStrip.SuspendLayout();
+            this.grpEsp32.SuspendLayout();
+            this.dashboardPanel.SuspendLayout();
+            this.grpFanCurve.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.fanCurveGrid)).BeginInit();
+            this.SuspendLayout();
+            // 
+            // cpuTempLabel
+            // 
+            this.cpuTempLabel.AutoSize = true;
+            this.cpuTempLabel.Location = new System.Drawing.Point(12, 10);
+            this.cpuTempLabel.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.cpuTempLabel.Name = "cpuTempLabel";
+            this.cpuTempLabel.Size = new System.Drawing.Size(96, 24);
+            this.cpuTempLabel.TabIndex = 0;
+            this.cpuTempLabel.Text = "CPU 温度: ";
+            // 
+            // gpuTempLabel
+            // 
+            this.gpuTempLabel.AutoSize = true;
+            this.gpuTempLabel.Location = new System.Drawing.Point(380, 10);
+            this.gpuTempLabel.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.gpuTempLabel.Name = "gpuTempLabel";
+            this.gpuTempLabel.Size = new System.Drawing.Size(97, 24);
+            this.gpuTempLabel.TabIndex = 1;
+            this.gpuTempLabel.Text = "GPU 温度: ";
+            // 
+            // comboBoxSerialPorts
+            // 
+            this.comboBoxSerialPorts.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBoxSerialPorts.FormattingEnabled = true;
+            this.comboBoxSerialPorts.Location = new System.Drawing.Point(12, 40);
+            this.comboBoxSerialPorts.Margin = new System.Windows.Forms.Padding(4);
+            this.comboBoxSerialPorts.Name = "comboBoxSerialPorts";
+            this.comboBoxSerialPorts.Size = new System.Drawing.Size(120, 32);
+            this.comboBoxSerialPorts.TabIndex = 2;
+            // 
+            // buttonConnect
+            // 
+            this.buttonConnect.Location = new System.Drawing.Point(140, 40);
+            this.buttonConnect.Margin = new System.Windows.Forms.Padding(4);
+            this.buttonConnect.Name = "buttonConnect";
+            this.buttonConnect.Size = new System.Drawing.Size(70, 32);
+            this.buttonConnect.TabIndex = 3;
+            this.buttonConnect.Text = "连接";
+            this.buttonConnect.UseVisualStyleBackColor = true;
+            this.buttonConnect.Click += new System.EventHandler(this.buttonConnect_Click);
+            // 
+            // labelConnectionStatus
+            // 
+            this.labelConnectionStatus.AutoSize = true;
+            this.labelConnectionStatus.Location = new System.Drawing.Point(218, 44);
+            this.labelConnectionStatus.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.labelConnectionStatus.Name = "labelConnectionStatus";
+            this.labelConnectionStatus.Size = new System.Drawing.Size(64, 24);
+            this.labelConnectionStatus.TabIndex = 4;
+            this.labelConnectionStatus.Text = "已断开";
+            // 
+            // checkBoxUseAida64Mode
+            // 
+            this.checkBoxUseAida64Mode.AutoSize = true;
+            this.checkBoxUseAida64Mode.Location = new System.Drawing.Point(12, 76);
+            this.checkBoxUseAida64Mode.Name = "checkBoxUseAida64Mode";
+            this.checkBoxUseAida64Mode.Size = new System.Drawing.Size(283, 28);
+            this.checkBoxUseAida64Mode.TabIndex = 5;
+            this.checkBoxUseAida64Mode.Text = "使用AIDA64获取硬件温度信息";
+            this.checkBoxUseAida64Mode.UseVisualStyleBackColor = true;
+            this.checkBoxUseAida64Mode.CheckedChanged += new System.EventHandler(this.checkBox_useAida64Mode);
+            // 
+            // comboBoxChooseCpuMonitor
+            // 
+            this.comboBoxChooseCpuMonitor.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBoxChooseCpuMonitor.Enabled = false;
+            this.comboBoxChooseCpuMonitor.ForeColor = System.Drawing.Color.Black;
+            this.comboBoxChooseCpuMonitor.FormattingEnabled = true;
+            this.comboBoxChooseCpuMonitor.Location = new System.Drawing.Point(116, 104);
+            this.comboBoxChooseCpuMonitor.Name = "comboBoxChooseCpuMonitor";
+            this.comboBoxChooseCpuMonitor.Size = new System.Drawing.Size(155, 32);
+            this.comboBoxChooseCpuMonitor.TabIndex = 7;
+            // 
+            // comboBoxChooseGpuMonitor
+            // 
+            this.comboBoxChooseGpuMonitor.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBoxChooseGpuMonitor.Enabled = false;
+            this.comboBoxChooseGpuMonitor.ForeColor = System.Drawing.Color.Black;
+            this.comboBoxChooseGpuMonitor.FormattingEnabled = true;
+            this.comboBoxChooseGpuMonitor.Location = new System.Drawing.Point(378, 104);
+            this.comboBoxChooseGpuMonitor.Name = "comboBoxChooseGpuMonitor";
+            this.comboBoxChooseGpuMonitor.Size = new System.Drawing.Size(155, 32);
+            this.comboBoxChooseGpuMonitor.TabIndex = 7;
+            // 
+            // labelNoticeCpuMonitor
+            // 
+            this.labelNoticeCpuMonitor.AutoSize = true;
+            this.labelNoticeCpuMonitor.ForeColor = System.Drawing.Color.Gray;
+            this.labelNoticeCpuMonitor.Location = new System.Drawing.Point(12, 108);
+            this.labelNoticeCpuMonitor.Name = "labelNoticeCpuMonitor";
+            this.labelNoticeCpuMonitor.Size = new System.Drawing.Size(104, 24);
+            this.labelNoticeCpuMonitor.TabIndex = 8;
+            this.labelNoticeCpuMonitor.Text = "CPU传感器:";
+            // 
+            // labelNoticeGpuMonitor
+            // 
+            this.labelNoticeGpuMonitor.AutoSize = true;
+            this.labelNoticeGpuMonitor.ForeColor = System.Drawing.Color.Gray;
+            this.labelNoticeGpuMonitor.Location = new System.Drawing.Point(272, 108);
+            this.labelNoticeGpuMonitor.Name = "labelNoticeGpuMonitor";
+            this.labelNoticeGpuMonitor.Size = new System.Drawing.Size(105, 24);
+            this.labelNoticeGpuMonitor.TabIndex = 9;
+            this.labelNoticeGpuMonitor.Text = "GPU传感器:";
+            // 
+            // buttonUseChosenMonitor
+            // 
+            this.buttonUseChosenMonitor.Enabled = false;
+            this.buttonUseChosenMonitor.Location = new System.Drawing.Point(536, 104);
+            this.buttonUseChosenMonitor.Name = "buttonUseChosenMonitor";
+            this.buttonUseChosenMonitor.Size = new System.Drawing.Size(55, 32);
+            this.buttonUseChosenMonitor.TabIndex = 10;
+            this.buttonUseChosenMonitor.Text = "确认";
+            this.buttonUseChosenMonitor.UseVisualStyleBackColor = true;
+            this.buttonUseChosenMonitor.Click += new System.EventHandler(this.buttonUseChosenMonitor_Click);
+            // 
+            // statusStrip
+            // 
+            this.statusStrip.ImageScalingSize = new System.Drawing.Size(24, 24);
+            this.statusStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripStatusAida64CpuMonitor,
+            this.toolStripStatusAida64GpuMonitor});
+            this.statusStrip.Location = new System.Drawing.Point(0, 581);
+            this.statusStrip.Name = "statusStrip";
+            this.statusStrip.Size = new System.Drawing.Size(673, 31);
+            this.statusStrip.TabIndex = 11;
+            this.statusStrip.Text = "statusStrip";
+            // 
+            // toolStripStatusAida64CpuMonitor
+            // 
+            this.toolStripStatusAida64CpuMonitor.ForeColor = System.Drawing.Color.Gray;
+            this.toolStripStatusAida64CpuMonitor.Name = "toolStripStatusAida64CpuMonitor";
+            this.toolStripStatusAida64CpuMonitor.Size = new System.Drawing.Size(186, 24);
+            this.toolStripStatusAida64CpuMonitor.Text = "AIDA64 CPU 传感器: ";
+            // 
+            // toolStripStatusAida64GpuMonitor
+            // 
+            this.toolStripStatusAida64GpuMonitor.ForeColor = System.Drawing.Color.Gray;
+            this.toolStripStatusAida64GpuMonitor.Name = "toolStripStatusAida64GpuMonitor";
+            this.toolStripStatusAida64GpuMonitor.Size = new System.Drawing.Size(187, 24);
+            this.toolStripStatusAida64GpuMonitor.Text = "AIDA64 GPU 传感器: ";
+            // 
+            // domainUpDownSelectRefreshTime
+            // 
+            this.domainUpDownSelectRefreshTime.Location = new System.Drawing.Point(386, 40);
+            this.domainUpDownSelectRefreshTime.Name = "domainUpDownSelectRefreshTime";
+            this.domainUpDownSelectRefreshTime.Size = new System.Drawing.Size(56, 30);
+            this.domainUpDownSelectRefreshTime.TabIndex = 12;
+            // 
+            // buttonConfirmRefreshTime
+            // 
+            this.buttonConfirmRefreshTime.Location = new System.Drawing.Point(448, 40);
+            this.buttonConfirmRefreshTime.Name = "buttonConfirmRefreshTime";
+            this.buttonConfirmRefreshTime.Size = new System.Drawing.Size(55, 32);
+            this.buttonConfirmRefreshTime.TabIndex = 13;
+            this.buttonConfirmRefreshTime.Text = "确认";
+            this.buttonConfirmRefreshTime.UseVisualStyleBackColor = true;
+            this.buttonConfirmRefreshTime.Click += new System.EventHandler(this.buttonConfirmRefreshTime_Click);
+            // 
+            // labelNoticeRefreshTimeAdjustmentWindow
+            // 
+            this.labelNoticeRefreshTimeAdjustmentWindow.AutoSize = true;
+            this.labelNoticeRefreshTimeAdjustmentWindow.Location = new System.Drawing.Point(10, 141);
+            this.labelNoticeRefreshTimeAdjustmentWindow.Name = "labelNoticeRefreshTimeAdjustmentWindow";
+            this.labelNoticeRefreshTimeAdjustmentWindow.Size = new System.Drawing.Size(203, 24);
+            this.labelNoticeRefreshTimeAdjustmentWindow.TabIndex = 14;
+            this.labelNoticeRefreshTimeAdjustmentWindow.Text = "选择刷新时间（3-30s）";
+            this.labelNoticeRefreshTimeAdjustmentWindow.Visible = false;
+            // 
+            // notifyIcon
+            // 
+            this.notifyIcon.Icon = global::CPUwenduhuoqu.Properties.Resources.MainIcon;
+            this.notifyIcon.Text = "硬件温度监测";
+            this.notifyIcon.Click += new System.EventHandler(this.NotifyIcon_Click);
+            // 
+            // checkBoxMinimizeToTray
+            // 
+            this.checkBoxMinimizeToTray.AutoSize = true;
+            this.checkBoxMinimizeToTray.Location = new System.Drawing.Point(420, 76);
+            this.checkBoxMinimizeToTray.Name = "checkBoxMinimizeToTray";
+            this.checkBoxMinimizeToTray.Size = new System.Drawing.Size(144, 28);
+            this.checkBoxMinimizeToTray.TabIndex = 21;
+            this.checkBoxMinimizeToTray.Text = "最小化到托盘";
+            this.checkBoxMinimizeToTray.CheckedChanged += new System.EventHandler(this.checkBoxMinimizeToTray_CheckedChanged);
+            // 
+            // lblRefreshHint
+            // 
+            this.lblRefreshHint.AutoSize = true;
+            this.lblRefreshHint.Location = new System.Drawing.Point(300, 44);
+            this.lblRefreshHint.Name = "lblRefreshHint";
+            this.lblRefreshHint.Size = new System.Drawing.Size(86, 24);
+            this.lblRefreshHint.TabIndex = 20;
+            this.lblRefreshHint.Text = "刷新间隔:";
+            // 
+            // grpEsp32
+            // 
+            this.grpEsp32.Controls.Add(this.btnToggleView);
+            this.grpEsp32.Controls.Add(this.dashboardPanel);
+            this.grpEsp32.Controls.Add(this.txtStatusLog);
+            this.grpEsp32.Location = new System.Drawing.Point(10, 136);
+            this.grpEsp32.Name = "grpEsp32";
+            this.grpEsp32.Size = new System.Drawing.Size(650, 190);
+            this.grpEsp32.TabIndex = 30;
+            this.grpEsp32.TabStop = false;
+            this.grpEsp32.Text = "固件状态";
+            // 
+            // btnToggleView
+            // 
+            this.btnToggleView.Location = new System.Drawing.Point(544, 14);
+            this.btnToggleView.Name = "btnToggleView";
+            this.btnToggleView.Size = new System.Drawing.Size(95, 32);
+            this.btnToggleView.TabIndex = 0;
+            this.btnToggleView.Text = "日志模式";
+            this.btnToggleView.UseVisualStyleBackColor = true;
+            this.btnToggleView.Click += new System.EventHandler(this.btnToggleView_Click);
+            // 
+            // dashboardPanel
+            // 
+            this.dashboardPanel.Controls.Add(this.lblDashUpdate);
+            this.dashboardPanel.Controls.Add(this.lblDashGpuOk);
+            this.dashboardPanel.Controls.Add(this.lblDashGpuTemp);
+            this.dashboardPanel.Controls.Add(this.lblDashCpuOk);
+            this.dashboardPanel.Controls.Add(this.lblDashCpuTemp);
+            this.dashboardPanel.Controls.Add(this.lblDashFreq);
+            this.dashboardPanel.Controls.Add(this.lblDashFan);
+            this.dashboardPanel.Controls.Add(this.lblDashMode);
+            this.dashboardPanel.Controls.Add(this.btnRemoteDutyDn);
+            this.dashboardPanel.Controls.Add(this.btnRemoteDutyUp);
+            this.dashboardPanel.Controls.Add(this.btnRemoteFreqDn);
+            this.dashboardPanel.Controls.Add(this.btnRemoteFreqUp);
+            this.dashboardPanel.Controls.Add(this.btnRemoteMode);
+            this.dashboardPanel.Location = new System.Drawing.Point(8, 24);
+            this.dashboardPanel.Name = "dashboardPanel";
+            this.dashboardPanel.Size = new System.Drawing.Size(634, 140);
+            this.dashboardPanel.TabIndex = 1;
+            // 
+            // lblDashUpdate
+            // 
+            this.lblDashUpdate.ForeColor = System.Drawing.Color.Gray;
+            this.lblDashUpdate.Location = new System.Drawing.Point(76, 82);
+            this.lblDashUpdate.Name = "lblDashUpdate";
+            this.lblDashUpdate.Size = new System.Drawing.Size(120, 25);
+            this.lblDashUpdate.TabIndex = 0;
+            this.lblDashUpdate.Text = "等待数据...";
+            // 
+            // lblDashGpuOk
+            // 
+            this.lblDashGpuOk.ForeColor = System.Drawing.Color.Gray;
+            this.lblDashGpuOk.Location = new System.Drawing.Point(392, 52);
+            this.lblDashGpuOk.Name = "lblDashGpuOk";
+            this.lblDashGpuOk.Size = new System.Drawing.Size(28, 20);
+            this.lblDashGpuOk.TabIndex = 1;
+            // 
+            // lblDashGpuTemp
+            // 
+            this.lblDashGpuTemp.Font = new System.Drawing.Font("Consolas", 11F, System.Drawing.FontStyle.Bold);
+            this.lblDashGpuTemp.ForeColor = System.Drawing.Color.DarkRed;
+            this.lblDashGpuTemp.Location = new System.Drawing.Point(286, 50);
+            this.lblDashGpuTemp.Name = "lblDashGpuTemp";
+            this.lblDashGpuTemp.Size = new System.Drawing.Size(110, 22);
+            this.lblDashGpuTemp.TabIndex = 2;
+            this.lblDashGpuTemp.Text = "--.- °C";
+            // 
+            // lblDashCpuOk
+            // 
+            this.lblDashCpuOk.ForeColor = System.Drawing.Color.Gray;
+            this.lblDashCpuOk.Location = new System.Drawing.Point(172, 52);
+            this.lblDashCpuOk.Name = "lblDashCpuOk";
+            this.lblDashCpuOk.Size = new System.Drawing.Size(28, 20);
+            this.lblDashCpuOk.TabIndex = 3;
+            // 
+            // lblDashCpuTemp
+            // 
+            this.lblDashCpuTemp.Font = new System.Drawing.Font("Consolas", 11F, System.Drawing.FontStyle.Bold);
+            this.lblDashCpuTemp.ForeColor = System.Drawing.Color.DarkRed;
+            this.lblDashCpuTemp.Location = new System.Drawing.Point(66, 50);
+            this.lblDashCpuTemp.Name = "lblDashCpuTemp";
+            this.lblDashCpuTemp.Size = new System.Drawing.Size(110, 22);
+            this.lblDashCpuTemp.TabIndex = 4;
+            this.lblDashCpuTemp.Text = "--.- °C";
+            // 
+            // lblDashFreq
+            // 
+            this.lblDashFreq.Font = new System.Drawing.Font("Consolas", 11F, System.Drawing.FontStyle.Bold);
+            this.lblDashFreq.ForeColor = System.Drawing.Color.DarkGreen;
+            this.lblDashFreq.Location = new System.Drawing.Point(382, 8);
+            this.lblDashFreq.Name = "lblDashFreq";
+            this.lblDashFreq.Size = new System.Drawing.Size(80, 22);
+            this.lblDashFreq.TabIndex = 5;
+            this.lblDashFreq.Text = "--";
+            // 
+            // lblDashFan
+            // 
+            this.lblDashFan.Font = new System.Drawing.Font("Consolas", 11F, System.Drawing.FontStyle.Bold);
+            this.lblDashFan.ForeColor = System.Drawing.Color.DarkGreen;
+            this.lblDashFan.Location = new System.Drawing.Point(222, 8);
+            this.lblDashFan.Name = "lblDashFan";
+            this.lblDashFan.Size = new System.Drawing.Size(70, 22);
+            this.lblDashFan.TabIndex = 6;
+            this.lblDashFan.Text = "--";
+            // 
+            // lblDashMode
+            // 
+            this.lblDashMode.Font = new System.Drawing.Font("Consolas", 11F, System.Drawing.FontStyle.Bold);
+            this.lblDashMode.ForeColor = System.Drawing.Color.DarkBlue;
+            this.lblDashMode.Location = new System.Drawing.Point(64, 8);
+            this.lblDashMode.Name = "lblDashMode";
+            this.lblDashMode.Size = new System.Drawing.Size(80, 22);
+            this.lblDashMode.TabIndex = 7;
+            this.lblDashMode.Text = "--";
+            // 
+            // btnRemoteDutyDn
+            // 
+            this.btnRemoteDutyDn.Location = new System.Drawing.Point(258, 110);
+            this.btnRemoteDutyDn.Name = "btnRemoteDutyDn";
+            this.btnRemoteDutyDn.Size = new System.Drawing.Size(62, 30);
+            this.btnRemoteDutyDn.TabIndex = 6;
+            this.btnRemoteDutyDn.Text = "占空-";
+            this.btnRemoteDutyDn.UseVisualStyleBackColor = true;
+            this.btnRemoteDutyDn.Click += new System.EventHandler(this.BtnRemoteDutyDn_Click);
+            // 
+            // btnRemoteDutyUp
+            // 
+            this.btnRemoteDutyUp.Location = new System.Drawing.Point(196, 110);
+            this.btnRemoteDutyUp.Name = "btnRemoteDutyUp";
+            this.btnRemoteDutyUp.Size = new System.Drawing.Size(62, 30);
+            this.btnRemoteDutyUp.TabIndex = 5;
+            this.btnRemoteDutyUp.Text = "占空+";
+            this.btnRemoteDutyUp.UseVisualStyleBackColor = true;
+            this.btnRemoteDutyUp.Click += new System.EventHandler(this.BtnRemoteDutyUp_Click);
+            // 
+            // btnRemoteFreqDn
+            // 
+            this.btnRemoteFreqDn.Location = new System.Drawing.Point(134, 110);
+            this.btnRemoteFreqDn.Name = "btnRemoteFreqDn";
+            this.btnRemoteFreqDn.Size = new System.Drawing.Size(62, 30);
+            this.btnRemoteFreqDn.TabIndex = 4;
+            this.btnRemoteFreqDn.Text = "频率-";
+            this.btnRemoteFreqDn.UseVisualStyleBackColor = true;
+            this.btnRemoteFreqDn.Click += new System.EventHandler(this.BtnRemoteFreqDn_Click);
+            // 
+            // btnRemoteFreqUp
+            // 
+            this.btnRemoteFreqUp.Location = new System.Drawing.Point(72, 110);
+            this.btnRemoteFreqUp.Name = "btnRemoteFreqUp";
+            this.btnRemoteFreqUp.Size = new System.Drawing.Size(62, 30);
+            this.btnRemoteFreqUp.TabIndex = 3;
+            this.btnRemoteFreqUp.Text = "频率+";
+            this.btnRemoteFreqUp.UseVisualStyleBackColor = true;
+            this.btnRemoteFreqUp.Click += new System.EventHandler(this.BtnRemoteFreqUp_Click);
+            // 
+            // btnRemoteMode
+            // 
+            this.btnRemoteMode.Location = new System.Drawing.Point(10, 110);
+            this.btnRemoteMode.Name = "btnRemoteMode";
+            this.btnRemoteMode.Size = new System.Drawing.Size(62, 30);
+            this.btnRemoteMode.TabIndex = 2;
+            this.btnRemoteMode.Text = "模式";
+            this.btnRemoteMode.UseVisualStyleBackColor = true;
+            this.btnRemoteMode.Click += new System.EventHandler(this.BtnRemoteMode_Click);
+            // 
+            // txtStatusLog
+            // 
+            this.txtStatusLog.Location = new System.Drawing.Point(8, 46);
+            this.txtStatusLog.Multiline = true;
+            this.txtStatusLog.Name = "txtStatusLog";
+            this.txtStatusLog.ReadOnly = true;
+            this.txtStatusLog.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.txtStatusLog.Size = new System.Drawing.Size(580, 102);
+            this.txtStatusLog.TabIndex = 7;
+            this.txtStatusLog.Visible = false;
+            // 
+            // grpFanCurve
+            // 
+            this.grpFanCurve.Controls.Add(this.fanCurveGrid);
+            this.grpFanCurve.Controls.Add(this.btnSendCurve);
+            this.grpFanCurve.Controls.Add(this.btnReadCurve);
+            this.grpFanCurve.Controls.Add(this.btnQueryStatus);
+            this.grpFanCurve.Location = new System.Drawing.Point(10, 330);
+            this.grpFanCurve.Name = "grpFanCurve";
+            this.grpFanCurve.Size = new System.Drawing.Size(650, 240);
+            this.grpFanCurve.TabIndex = 40;
+            this.grpFanCurve.TabStop = false;
+            this.grpFanCurve.Text = "风扇曲线配置";
+            // 
+            // fanCurveGrid
+            // 
+            this.fanCurveGrid.ColumnHeadersHeight = 34;
+            this.fanCurveGrid.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
+            this.fanCurveGrid.Location = new System.Drawing.Point(10, 22);
+            this.fanCurveGrid.Name = "fanCurveGrid";
+            this.fanCurveGrid.RowHeadersVisible = false;
+            this.fanCurveGrid.RowHeadersWidth = 62;
+            this.fanCurveGrid.Size = new System.Drawing.Size(240, 200);
+            this.fanCurveGrid.TabIndex = 0;
+            // 
+            // btnSendCurve
+            // 
+            this.btnSendCurve.Location = new System.Drawing.Point(285, 20);
+            this.btnSendCurve.Name = "btnSendCurve";
+            this.btnSendCurve.Size = new System.Drawing.Size(105, 36);
+            this.btnSendCurve.TabIndex = 1;
+            this.btnSendCurve.Text = "发送曲线";
+            this.btnSendCurve.UseVisualStyleBackColor = true;
+            this.btnSendCurve.Click += new System.EventHandler(this.BtnSendCurve_Click);
+            // 
+            // btnReadCurve
+            // 
+            this.btnReadCurve.Location = new System.Drawing.Point(285, 66);
+            this.btnReadCurve.Name = "btnReadCurve";
+            this.btnReadCurve.Size = new System.Drawing.Size(105, 36);
+            this.btnReadCurve.TabIndex = 2;
+            this.btnReadCurve.Text = "读取曲线";
+            this.btnReadCurve.UseVisualStyleBackColor = true;
+            this.btnReadCurve.Click += new System.EventHandler(this.BtnReadCurve_Click);
+            // 
+            // btnQueryStatus
+            // 
+            this.btnQueryStatus.Location = new System.Drawing.Point(285, 112);
+            this.btnQueryStatus.Name = "btnQueryStatus";
+            this.btnQueryStatus.Size = new System.Drawing.Size(105, 36);
+            this.btnQueryStatus.TabIndex = 3;
+            this.btnQueryStatus.Text = "查询状态";
+            this.btnQueryStatus.UseVisualStyleBackColor = true;
+            this.btnQueryStatus.Click += new System.EventHandler(this.BtnQueryStatus_Click);
+            // 
+            // MainForm
+            // 
+            this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 24F);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.ClientSize = new System.Drawing.Size(673, 612);
+            this.Controls.Add(this.grpFanCurve);
+            this.Controls.Add(this.grpEsp32);
+            this.Controls.Add(this.checkBoxMinimizeToTray);
+            this.Controls.Add(this.lblRefreshHint);
+            this.Controls.Add(this.labelNoticeRefreshTimeAdjustmentWindow);
+            this.Controls.Add(this.buttonConfirmRefreshTime);
+            this.Controls.Add(this.domainUpDownSelectRefreshTime);
+            this.Controls.Add(this.statusStrip);
+            this.Controls.Add(this.buttonUseChosenMonitor);
+            this.Controls.Add(this.labelNoticeGpuMonitor);
+            this.Controls.Add(this.labelNoticeCpuMonitor);
+            this.Controls.Add(this.comboBoxChooseGpuMonitor);
+            this.Controls.Add(this.comboBoxChooseCpuMonitor);
+            this.Controls.Add(this.checkBoxUseAida64Mode);
+            this.Controls.Add(this.labelConnectionStatus);
+            this.Controls.Add(this.buttonConnect);
+            this.Controls.Add(this.comboBoxSerialPorts);
+            this.Controls.Add(this.gpuTempLabel);
+            this.Controls.Add(this.cpuTempLabel);
+            this.Font = new System.Drawing.Font("Microsoft YaHei UI", 9F);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.Margin = new System.Windows.Forms.Padding(4);
+            this.MaximizeBox = false;
+            this.Name = "MainForm";
+            this.Text = "硬件温度监测";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
+            this.Load += new System.EventHandler(this.MainForm_Load);
+            this.Resize += new System.EventHandler(this.MainForm_Resize);
+            this.statusStrip.ResumeLayout(false);
+            this.statusStrip.PerformLayout();
+            this.grpEsp32.ResumeLayout(false);
+            this.grpEsp32.PerformLayout();
+            this.dashboardPanel.ResumeLayout(false);
+            this.grpFanCurve.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.fanCurveGrid)).EndInit();
+            this.ResumeLayout(false);
+            this.PerformLayout();
 
-            // ================================================================
-            // 控件实例化
-            // ================================================================
-
-            cpuTempLabel = new Label();
-            gpuTempLabel = new Label();
-            comboBoxSerialPorts = new ComboBox();
-            buttonConnect = new Button();
-            labelConnectionStatus = new Label();
-            checkBoxUseAida64Mode = new CheckBox();
-            comboBoxChooseCpuMonitor = new ComboBox();
-            comboBoxChooseGpuMonitor = new ComboBox();
-            labelNoticeCpuMonitor = new Label();
-            labelNoticeGpuMonitor = new Label();
-            buttonUseChosenMonitor = new Button();
-            statusStrip = new StatusStrip();
-            toolStripStatusAida64CpuMonitor = new ToolStripStatusLabel();
-            toolStripStatusAida64GpuMonitor = new ToolStripStatusLabel();
-            domainUpDownSelectRefreshTime = new DomainUpDown();
-            buttonConfirmRefreshTime = new Button();
-            labelNoticeRefreshTimeAdjustmentWindow = new Label();
-            notifyIcon = new NotifyIcon(components);
-            checkBoxMinimizeToTray = new CheckBox();
-            lblRefreshHint = new Label();
-
-            grpEsp32 = new GroupBox();
-            dashboardPanel = new Panel();
-            lblDashMode = new Label();
-            lblDashFan = new Label();
-            lblDashFreq = new Label();
-            lblDashCpuTemp = new Label();
-            lblDashGpuTemp = new Label();
-            lblDashCpuOk = new Label();
-            lblDashGpuOk = new Label();
-            lblDashUpdate = new Label();
-            txtStatusLog = new TextBox();
-            btnToggleView = new Button();
-            btnRemoteMode = new Button();
-            btnRemoteFreqUp = new Button();
-            btnRemoteFreqDn = new Button();
-            btnRemoteDutyUp = new Button();
-            btnRemoteDutyDn = new Button();
-
-            grpFanCurve = new GroupBox();
-            fanCurveGrid = new DataGridView();
-            btnSendCurve = new Button();
-            btnReadCurve = new Button();
-            btnQueryStatus = new Button();
-
-            statusStrip.SuspendLayout();
-            grpEsp32.SuspendLayout();
-            dashboardPanel.SuspendLayout();
-            grpFanCurve.SuspendLayout();
-            SuspendLayout();
-
-            // ================================================================
-            // 温度标签 (Row 0, y=10)
-            // ================================================================
-
-            cpuTempLabel.AutoSize = true;
-            cpuTempLabel.Location = new Point(12, 10);
-            cpuTempLabel.Margin = new Padding(4, 0, 4, 0);
-            cpuTempLabel.Name = "cpuTempLabel";
-            cpuTempLabel.Size = new Size(98, 18);
-            cpuTempLabel.TabIndex = 0;
-            cpuTempLabel.Text = "CPU 温度: ";
-
-            gpuTempLabel.AutoSize = true;
-            gpuTempLabel.Location = new Point(380, 10);
-            gpuTempLabel.Margin = new Padding(4, 0, 4, 0);
-            gpuTempLabel.Name = "gpuTempLabel";
-            gpuTempLabel.Size = new Size(98, 18);
-            gpuTempLabel.TabIndex = 1;
-            gpuTempLabel.Text = "GPU 温度: ";
-
-            // ================================================================
-            // 串口 + 刷新间隔 (Row 1, y=40)
-            // ================================================================
-
-            comboBoxSerialPorts.DropDownStyle = ComboBoxStyle.DropDownList;
-            comboBoxSerialPorts.FormattingEnabled = true;
-            comboBoxSerialPorts.Location = new Point(12, 40);
-            comboBoxSerialPorts.Margin = new Padding(4);
-            comboBoxSerialPorts.Name = "comboBoxSerialPorts";
-            comboBoxSerialPorts.Size = new Size(120, 26);
-            comboBoxSerialPorts.TabIndex = 2;
-
-            buttonConnect.Location = new Point(140, 40);
-            buttonConnect.Margin = new Padding(4);
-            buttonConnect.Name = "buttonConnect";
-            buttonConnect.Size = new Size(70, 32);
-            buttonConnect.TabIndex = 3;
-            buttonConnect.Text = "连接";
-            buttonConnect.UseVisualStyleBackColor = true;
-            buttonConnect.Click += new EventHandler(buttonConnect_Click);
-
-            labelConnectionStatus.AutoSize = true;
-            labelConnectionStatus.Location = new Point(218, 44);
-            labelConnectionStatus.Margin = new Padding(4, 0, 4, 0);
-            labelConnectionStatus.Name = "labelConnectionStatus";
-            labelConnectionStatus.Size = new Size(44, 18);
-            labelConnectionStatus.TabIndex = 4;
-            labelConnectionStatus.Text = "已断开";
-
-            lblRefreshHint.AutoSize = true;
-            lblRefreshHint.Location = new Point(300, 44);
-            lblRefreshHint.Name = "lblRefreshHint";
-            lblRefreshHint.Size = new Size(76, 18);
-            lblRefreshHint.TabIndex = 20;
-            lblRefreshHint.Text = "刷新间隔:";
-
-            domainUpDownSelectRefreshTime.Location = new Point(385, 40);
-            domainUpDownSelectRefreshTime.Name = "domainUpDownSelectRefreshTime";
-            domainUpDownSelectRefreshTime.Size = new Size(56, 26);
-            domainUpDownSelectRefreshTime.TabIndex = 12;
-
-            buttonConfirmRefreshTime.Location = new Point(448, 40);
-            buttonConfirmRefreshTime.Name = "buttonConfirmRefreshTime";
-            buttonConfirmRefreshTime.Size = new Size(55, 32);
-            buttonConfirmRefreshTime.TabIndex = 13;
-            buttonConfirmRefreshTime.Text = "确认";
-            buttonConfirmRefreshTime.UseVisualStyleBackColor = true;
-            buttonConfirmRefreshTime.Click += new EventHandler(buttonConfirmRefreshTime_Click);
-
-            // ================================================================
-            // AIDA64 + 最小化到托盘 (Row 2a, y=76)
-            // ================================================================
-
-            checkBoxUseAida64Mode.AutoSize = true;
-            checkBoxUseAida64Mode.Location = new Point(12, 76);
-            checkBoxUseAida64Mode.Name = "checkBoxUseAida64Mode";
-            checkBoxUseAida64Mode.Size = new Size(260, 22);
-            checkBoxUseAida64Mode.TabIndex = 5;
-            checkBoxUseAida64Mode.Text = "使用AIDA64获取硬件温度信息";
-            checkBoxUseAida64Mode.UseVisualStyleBackColor = true;
-            checkBoxUseAida64Mode.CheckedChanged += new EventHandler(checkBox_useAida64Mode);
-
-            checkBoxMinimizeToTray.AutoSize = true;
-            checkBoxMinimizeToTray.Location = new Point(420, 76);
-            checkBoxMinimizeToTray.Name = "checkBoxMinimizeToTray";
-            checkBoxMinimizeToTray.Size = new Size(124, 22);
-            checkBoxMinimizeToTray.TabIndex = 21;
-            checkBoxMinimizeToTray.Text = "最小化到托盘";
-            checkBoxMinimizeToTray.CheckedChanged += new EventHandler(checkBoxMinimizeToTray_CheckedChanged);
-
-            // ================================================================
-            // AIDA64 传感器选择 (Row 2b, y=104)
-            // ================================================================
-
-            labelNoticeCpuMonitor.AutoSize = true;
-            labelNoticeCpuMonitor.ForeColor = Color.Gray;
-            labelNoticeCpuMonitor.Location = new Point(12, 108);
-            labelNoticeCpuMonitor.Name = "labelNoticeCpuMonitor";
-            labelNoticeCpuMonitor.Size = new Size(88, 18);
-            labelNoticeCpuMonitor.TabIndex = 8;
-            labelNoticeCpuMonitor.Text = "CPU传感器:";
-
-            comboBoxChooseCpuMonitor.DropDownStyle = ComboBoxStyle.DropDownList;
-            comboBoxChooseCpuMonitor.Enabled = false;
-            comboBoxChooseCpuMonitor.ForeColor = Color.Black;
-            comboBoxChooseCpuMonitor.FormattingEnabled = true;
-            comboBoxChooseCpuMonitor.Location = new Point(98, 104);
-            comboBoxChooseCpuMonitor.Name = "comboBoxChooseCpuMonitor";
-            comboBoxChooseCpuMonitor.Size = new Size(155, 26);
-            comboBoxChooseCpuMonitor.TabIndex = 7;
-
-            labelNoticeGpuMonitor.AutoSize = true;
-            labelNoticeGpuMonitor.ForeColor = Color.Gray;
-            labelNoticeGpuMonitor.Location = new Point(262, 108);
-            labelNoticeGpuMonitor.Name = "labelNoticeGpuMonitor";
-            labelNoticeGpuMonitor.Size = new Size(88, 18);
-            labelNoticeGpuMonitor.TabIndex = 9;
-            labelNoticeGpuMonitor.Text = "GPU传感器:";
-
-            comboBoxChooseGpuMonitor.DropDownStyle = ComboBoxStyle.DropDownList;
-            comboBoxChooseGpuMonitor.Enabled = false;
-            comboBoxChooseGpuMonitor.ForeColor = Color.Black;
-            comboBoxChooseGpuMonitor.FormattingEnabled = true;
-            comboBoxChooseGpuMonitor.Location = new Point(348, 104);
-            comboBoxChooseGpuMonitor.Name = "comboBoxChooseGpuMonitor";
-            comboBoxChooseGpuMonitor.Size = new Size(155, 26);
-            comboBoxChooseGpuMonitor.TabIndex = 7;
-
-            buttonUseChosenMonitor.Enabled = false;
-            buttonUseChosenMonitor.Location = new Point(512, 102);
-            buttonUseChosenMonitor.Name = "buttonUseChosenMonitor";
-            buttonUseChosenMonitor.Size = new Size(55, 32);
-            buttonUseChosenMonitor.TabIndex = 10;
-            buttonUseChosenMonitor.Text = "确认";
-            buttonUseChosenMonitor.UseVisualStyleBackColor = true;
-            buttonUseChosenMonitor.Click += new EventHandler(buttonUseChosenMonitor_Click);
-
-            labelNoticeRefreshTimeAdjustmentWindow.AutoSize = true;
-            labelNoticeRefreshTimeAdjustmentWindow.Location = new Point(10, 141);
-            labelNoticeRefreshTimeAdjustmentWindow.Name = "labelNoticeRefreshTimeAdjustmentWindow";
-            labelNoticeRefreshTimeAdjustmentWindow.Size = new Size(160, 18);
-            labelNoticeRefreshTimeAdjustmentWindow.TabIndex = 14;
-            labelNoticeRefreshTimeAdjustmentWindow.Text = "选择刷新时间（3-30s）";
-            labelNoticeRefreshTimeAdjustmentWindow.Visible = false;
-
-            // ================================================================
-            // 状态栏
-            // ================================================================
-
-            statusStrip.ImageScalingSize = new Size(24, 24);
-            statusStrip.Items.AddRange(new ToolStripItem[] {
-                toolStripStatusAida64CpuMonitor,
-                toolStripStatusAida64GpuMonitor });
-            statusStrip.Location = new Point(0, 580);
-            statusStrip.Name = "statusStrip";
-            statusStrip.Size = new Size(720, 31);
-            statusStrip.TabIndex = 11;
-            statusStrip.Text = "statusStrip";
-
-            toolStripStatusAida64CpuMonitor.ForeColor = Color.Gray;
-            toolStripStatusAida64CpuMonitor.Name = "toolStripStatusAida64CpuMonitor";
-            toolStripStatusAida64CpuMonitor.Size = new Size(202, 24);
-            toolStripStatusAida64CpuMonitor.Text = "AIDA64 CPU 传感器: ";
-
-            toolStripStatusAida64GpuMonitor.ForeColor = Color.Gray;
-            toolStripStatusAida64GpuMonitor.Name = "toolStripStatusAida64GpuMonitor";
-            toolStripStatusAida64GpuMonitor.Size = new Size(203, 24);
-            toolStripStatusAida64GpuMonitor.Text = "AIDA64 GPU 传感器: ";
-
-            // ================================================================
-            // 托盘图标
-            // ================================================================
-
-            notifyIcon.Text = "硬件温度监测";
-            notifyIcon.Icon = Properties.Resources.MainIcon;
-            notifyIcon.Visible = false;
-            notifyIcon.Click += new EventHandler(NotifyIcon_Click);
-
-            // ================================================================
-            // 固件状态区 (y=136, h=190)
-            // ================================================================
-
-            grpEsp32.Location = new Point(10, 136);
-            grpEsp32.Name = "grpEsp32";
-            grpEsp32.Size = new Size(650, 190);
-            grpEsp32.TabIndex = 30;
-            grpEsp32.TabStop = false;
-            grpEsp32.Text = "固件状态";
-
-            btnToggleView.Location = new Point(544, 14);
-            btnToggleView.Name = "btnToggleView";
-            btnToggleView.Size = new Size(95, 32);
-            btnToggleView.TabIndex = 0;
-            btnToggleView.Text = "日志模式";
-            btnToggleView.UseVisualStyleBackColor = true;
-            btnToggleView.Click += new EventHandler(btnToggleView_Click);
-
-            dashboardPanel.Location = new Point(8, 24);
-            dashboardPanel.Name = "dashboardPanel";
-            dashboardPanel.Size = new Size(634, 140);
-            dashboardPanel.TabIndex = 1;
-
-            // -- 仪表盘标签 (运行时通过 BuildDashboard 填充) --
-
-            lblDashMode.Font = new Font("Consolas", 11F, FontStyle.Bold);
-            lblDashMode.ForeColor = Color.DarkBlue;
-            lblDashMode.Location = new Point(64, 8);
-            lblDashMode.Name = "lblDashMode";
-            lblDashMode.Size = new Size(80, 22);
-            lblDashMode.Text = "--";
-
-            lblDashFan.Font = new Font("Consolas", 11F, FontStyle.Bold);
-            lblDashFan.ForeColor = Color.DarkGreen;
-            lblDashFan.Location = new Point(222, 8);
-            lblDashFan.Name = "lblDashFan";
-            lblDashFan.Size = new Size(70, 22);
-            lblDashFan.Text = "--";
-
-            lblDashFreq.Font = new Font("Consolas", 11F, FontStyle.Bold);
-            lblDashFreq.ForeColor = Color.DarkGreen;
-            lblDashFreq.Location = new Point(382, 8);
-            lblDashFreq.Name = "lblDashFreq";
-            lblDashFreq.Size = new Size(80, 22);
-            lblDashFreq.Text = "--";
-
-            lblDashCpuTemp.Font = new Font("Consolas", 11F, FontStyle.Bold);
-            lblDashCpuTemp.ForeColor = Color.DarkRed;
-            lblDashCpuTemp.Location = new Point(66, 50);
-            lblDashCpuTemp.Name = "lblDashCpuTemp";
-            lblDashCpuTemp.Size = new Size(110, 22);
-            lblDashCpuTemp.Text = "--.- °C";
-
-            lblDashCpuOk.Location = new Point(172, 52);
-            lblDashCpuOk.Name = "lblDashCpuOk";
-            lblDashCpuOk.Size = new Size(28, 20);
-            lblDashCpuOk.ForeColor = Color.Gray;
-
-            lblDashGpuTemp.Font = new Font("Consolas", 11F, FontStyle.Bold);
-            lblDashGpuTemp.ForeColor = Color.DarkRed;
-            lblDashGpuTemp.Location = new Point(286, 50);
-            lblDashGpuTemp.Name = "lblDashGpuTemp";
-            lblDashGpuTemp.Size = new Size(110, 22);
-            lblDashGpuTemp.Text = "--.- °C";
-
-            lblDashGpuOk.Location = new Point(392, 52);
-            lblDashGpuOk.Name = "lblDashGpuOk";
-            lblDashGpuOk.Size = new Size(28, 20);
-            lblDashGpuOk.ForeColor = Color.Gray;
-
-            lblDashUpdate.ForeColor = Color.Gray;
-            lblDashUpdate.Location = new Point(76, 82);
-            lblDashUpdate.Name = "lblDashUpdate";
-            lblDashUpdate.Size = new Size(120, 18);
-            lblDashUpdate.Text = "等待数据...";
-
-            // -- 远程控制按钮 --
-
-            btnRemoteMode.Location = new Point(10, 110);
-            btnRemoteMode.Name = "btnRemoteMode";
-            btnRemoteMode.Size = new Size(62, 30);
-            btnRemoteMode.TabIndex = 2;
-            btnRemoteMode.Text = "模式";
-            btnRemoteMode.UseVisualStyleBackColor = true;
-            btnRemoteMode.Click += new EventHandler(BtnRemoteMode_Click);
-
-            btnRemoteFreqUp.Location = new Point(72, 110);
-            btnRemoteFreqUp.Name = "btnRemoteFreqUp";
-            btnRemoteFreqUp.Size = new Size(62, 30);
-            btnRemoteFreqUp.TabIndex = 3;
-            btnRemoteFreqUp.Text = "频率+";
-            btnRemoteFreqUp.UseVisualStyleBackColor = true;
-            btnRemoteFreqUp.Click += new EventHandler(BtnRemoteFreqUp_Click);
-
-            btnRemoteFreqDn.Location = new Point(134, 110);
-            btnRemoteFreqDn.Name = "btnRemoteFreqDn";
-            btnRemoteFreqDn.Size = new Size(62, 30);
-            btnRemoteFreqDn.TabIndex = 4;
-            btnRemoteFreqDn.Text = "频率-";
-            btnRemoteFreqDn.UseVisualStyleBackColor = true;
-            btnRemoteFreqDn.Click += new EventHandler(BtnRemoteFreqDn_Click);
-
-            btnRemoteDutyUp.Location = new Point(196, 110);
-            btnRemoteDutyUp.Name = "btnRemoteDutyUp";
-            btnRemoteDutyUp.Size = new Size(62, 30);
-            btnRemoteDutyUp.TabIndex = 5;
-            btnRemoteDutyUp.Text = "占空+";
-            btnRemoteDutyUp.UseVisualStyleBackColor = true;
-            btnRemoteDutyUp.Click += new EventHandler(BtnRemoteDutyUp_Click);
-
-            btnRemoteDutyDn.Location = new Point(258, 110);
-            btnRemoteDutyDn.Name = "btnRemoteDutyDn";
-            btnRemoteDutyDn.Size = new Size(62, 30);
-            btnRemoteDutyDn.TabIndex = 6;
-            btnRemoteDutyDn.Text = "占空-";
-            btnRemoteDutyDn.UseVisualStyleBackColor = true;
-            btnRemoteDutyDn.Click += new EventHandler(BtnRemoteDutyDn_Click);
-
-            // -- 日志文本框 --
-
-            txtStatusLog.Location = new Point(8, 46);
-            txtStatusLog.Multiline = true;
-            txtStatusLog.Name = "txtStatusLog";
-            txtStatusLog.ReadOnly = true;
-            txtStatusLog.ScrollBars = ScrollBars.Vertical;
-            txtStatusLog.Size = new Size(580, 102);
-            txtStatusLog.TabIndex = 7;
-            txtStatusLog.Visible = false;
-
-            // -- 组装固件状态区 --
-
-            dashboardPanel.Controls.Add(lblDashUpdate);
-            dashboardPanel.Controls.Add(lblDashGpuOk);
-            dashboardPanel.Controls.Add(lblDashGpuTemp);
-            dashboardPanel.Controls.Add(lblDashCpuOk);
-            dashboardPanel.Controls.Add(lblDashCpuTemp);
-            dashboardPanel.Controls.Add(lblDashFreq);
-            dashboardPanel.Controls.Add(lblDashFan);
-            dashboardPanel.Controls.Add(lblDashMode);
-            dashboardPanel.Controls.Add(btnRemoteDutyDn);
-            dashboardPanel.Controls.Add(btnRemoteDutyUp);
-            dashboardPanel.Controls.Add(btnRemoteFreqDn);
-            dashboardPanel.Controls.Add(btnRemoteFreqUp);
-            dashboardPanel.Controls.Add(btnRemoteMode);
-
-            grpEsp32.Controls.Add(btnToggleView);
-            grpEsp32.Controls.Add(dashboardPanel);
-            grpEsp32.Controls.Add(txtStatusLog);
-
-            // ================================================================
-            // 风扇曲线区 (y=330, h=240)
-            // ================================================================
-
-            grpFanCurve.Location = new Point(10, 330);
-            grpFanCurve.Name = "grpFanCurve";
-            grpFanCurve.Size = new Size(700, 240);
-            grpFanCurve.TabIndex = 40;
-            grpFanCurve.TabStop = false;
-            grpFanCurve.Text = "风扇曲线配置";
-
-            fanCurveGrid.AllowUserToAddRows = true;
-            fanCurveGrid.AllowUserToDeleteRows = true;
-            fanCurveGrid.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
-            fanCurveGrid.Location = new Point(10, 22);
-            fanCurveGrid.Name = "fanCurveGrid";
-            fanCurveGrid.RowHeadersVisible = false;
-            fanCurveGrid.Size = new Size(240, 200);
-            fanCurveGrid.TabIndex = 0;
-
-            btnSendCurve.Location = new Point(285, 20);
-            btnSendCurve.Name = "btnSendCurve";
-            btnSendCurve.Size = new Size(105, 36);
-            btnSendCurve.TabIndex = 1;
-            btnSendCurve.Text = "发送曲线";
-            btnSendCurve.UseVisualStyleBackColor = true;
-            btnSendCurve.Click += new EventHandler(BtnSendCurve_Click);
-
-            btnReadCurve.Location = new Point(285, 66);
-            btnReadCurve.Name = "btnReadCurve";
-            btnReadCurve.Size = new Size(105, 36);
-            btnReadCurve.TabIndex = 2;
-            btnReadCurve.Text = "读取曲线";
-            btnReadCurve.UseVisualStyleBackColor = true;
-            btnReadCurve.Click += new EventHandler(BtnReadCurve_Click);
-
-            btnQueryStatus.Location = new Point(285, 112);
-            btnQueryStatus.Name = "btnQueryStatus";
-            btnQueryStatus.Size = new Size(105, 36);
-            btnQueryStatus.TabIndex = 3;
-            btnQueryStatus.Text = "查询状态";
-            btnQueryStatus.UseVisualStyleBackColor = true;
-            btnQueryStatus.Click += new EventHandler(BtnQueryStatus_Click);
-
-            grpFanCurve.Controls.Add(fanCurveGrid);
-            grpFanCurve.Controls.Add(btnSendCurve);
-            grpFanCurve.Controls.Add(btnReadCurve);
-            grpFanCurve.Controls.Add(btnQueryStatus);
-
-            // ================================================================
-            // 窗体属性
-            // ================================================================
-
-            AutoScaleDimensions = new SizeF(9F, 18F);
-            AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(720, 630);
-            Font = new Font("Microsoft YaHei UI", 9F);
-
-            Controls.Add(grpFanCurve);
-            Controls.Add(grpEsp32);
-            Controls.Add(checkBoxMinimizeToTray);
-            Controls.Add(lblRefreshHint);
-            Controls.Add(labelNoticeRefreshTimeAdjustmentWindow);
-            Controls.Add(buttonConfirmRefreshTime);
-            Controls.Add(domainUpDownSelectRefreshTime);
-            Controls.Add(statusStrip);
-            Controls.Add(buttonUseChosenMonitor);
-            Controls.Add(labelNoticeGpuMonitor);
-            Controls.Add(labelNoticeCpuMonitor);
-            Controls.Add(comboBoxChooseGpuMonitor);
-            Controls.Add(comboBoxChooseCpuMonitor);
-            Controls.Add(checkBoxUseAida64Mode);
-            Controls.Add(labelConnectionStatus);
-            Controls.Add(buttonConnect);
-            Controls.Add(comboBoxSerialPorts);
-            Controls.Add(gpuTempLabel);
-            Controls.Add(cpuTempLabel);
-
-            FormBorderStyle = FormBorderStyle.FixedDialog;
-            Icon = (Icon)(resources.GetObject("$this.Icon"));
-            Margin = new Padding(4);
-            MaximizeBox = false;
-            Name = "MainForm";
-            Text = "硬件温度监测";
-
-            FormClosing += new FormClosingEventHandler(MainForm_FormClosing);
-            Load += new EventHandler(MainForm_Load);
-            Resize += new EventHandler(MainForm_Resize);
-
-            statusStrip.ResumeLayout(false);
-            statusStrip.PerformLayout();
-            grpEsp32.ResumeLayout(false);
-            grpEsp32.PerformLayout();
-            dashboardPanel.ResumeLayout(false);
-            dashboardPanel.PerformLayout();
-            grpFanCurve.ResumeLayout(false);
-            ResumeLayout(false);
-            PerformLayout();
         }
     }
 }
