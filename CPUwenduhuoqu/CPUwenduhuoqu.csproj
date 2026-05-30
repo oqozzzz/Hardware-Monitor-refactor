@@ -83,6 +83,9 @@
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="MainForm.Designer.cs">
+      <DependentUpon>MainForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="Hardware\IHardwareMonitor.cs" />
     <Compile Include="Hardware\LibreHardwareMonitorService.cs" />
     <Compile Include="Hardware\Aida64MonitorService.cs" />
