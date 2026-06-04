@@ -55,7 +55,7 @@ namespace CPUwenduhuoqu
             {
                 new MenuItem("显示主窗口", (s, ev) => { Show(); WindowState = FormWindowState.Normal; ShowInTaskbar = true; }),
                 new MenuItem("-"),
-                new MenuItem("退出程序", OnExit)
+                new MenuItem("退出程序", MenuItemExit_Click)
             });
         }
 
@@ -108,7 +108,7 @@ namespace CPUwenduhuoqu
             ShowInTaskbar = true;
         }
 
-        private void OnExit(object sender, EventArgs e)
+        private void MenuItemExit_Click(object sender, EventArgs e)
         {
             _isExiting = true;
             _config.Save();
@@ -438,7 +438,7 @@ namespace CPUwenduhuoqu
         // AIDA64 Mode & Sensor Selection
         // ====================================================================
 
-        private void checkBox_useAida64Mode(object sender, EventArgs e)
+        private void checkBoxUseAida64Mode_CheckedChanged(object sender, EventArgs e)
         {
             if (checkBoxUseAida64Mode.Checked)
             {
