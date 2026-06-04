@@ -18,6 +18,7 @@ namespace CPUwenduhuoqu
         private System.Windows.Forms.Timer _updateTimer;
         private StatusData _lastStatus;
         private bool _isExiting;
+        private bool _hasReceivedStatus;
 
         public MainForm()
         {
@@ -175,6 +176,17 @@ namespace CPUwenduhuoqu
             if (_serialService == null || !_serialService.IsOpen)
             {
                 MessageBox.Show("请先连接串口。", "提示", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return false;
+            }
+            return true;
+        }
+
+        private bool CheckReadyForRemote()
+        {
+            if (!CheckConnected()) return false;
+            if (!_hasReceivedStatus)
+            {
+                MessageBox.Show("尚未收到固件状态数据，请稍候。", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return false;
             }
             return true;
@@ -373,35 +385,35 @@ namespace CPUwenduhuoqu
 
         private void BtnRemoteMode_Click(object sender, EventArgs e)
         {
-            if (!CheckConnected()) return;
+            if (!CheckReadyForRemote()) return;
             int nextMode = (_lastStatus.Mode % 4) + 1;
             Task.Run(() => _serialService.Send(Protocol.BuildModeSet(nextMode)));
         }
 
         private void BtnRemoteFreqUp_Click(object sender, EventArgs e)
         {
-            if (!CheckConnected()) return;
+            if (!CheckReadyForRemote()) return;
             int newFreq = Math.Min(_lastStatus.FreqHz + 200, 40000);
             Task.Run(() => _serialService.Send(Protocol.BuildFreqSet(newFreq)));
         }
 
         private void BtnRemoteFreqDn_Click(object sender, EventArgs e)
         {
-            if (!CheckConnected()) return;
+            if (!CheckReadyForRemote()) return;
             int newFreq = Math.Max(_lastStatus.FreqHz - 200, 1000);
             Task.Run(() => _serialService.Send(Protocol.BuildFreqSet(newFreq)));
         }
 
         private void BtnRemoteDutyUp_Click(object sender, EventArgs e)
         {
-            if (!CheckConnected()) return;
+            if (!CheckReadyForRemote()) return;
             int newDuty = Math.Min(_lastStatus.DutyPercent + 10, 100);
             Task.Run(() => _serialService.Send(Protocol.BuildDutySet(newDuty)));
         }
 
         private void BtnRemoteDutyDn_Click(object sender, EventArgs e)
         {
-            if (!CheckConnected()) return;
+            if (!CheckReadyForRemote()) return;
             int newDuty = Math.Max(_lastStatus.DutyPercent - 10, 0);
             Task.Run(() => _serialService.Send(Protocol.BuildDutySet(newDuty)));
         }
@@ -590,8 +602,10 @@ namespace CPUwenduhuoqu
 
         private void UpdateDashboard(StatusData s)
         {
-            if (!isDashboardMode) return;
             _lastStatus = s;
+            _hasReceivedStatus = true;
+
+            if (!isDashboardMode) return;
 
             string modeStr;
             switch (s.Mode)
