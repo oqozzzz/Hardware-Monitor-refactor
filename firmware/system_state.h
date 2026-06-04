@@ -9,42 +9,46 @@
 #include "fan_curve.h"
 
 // ============================================================================
-// 系统全局状态结构
-// 所有字段通过 g_state_mutex 互斥访问，禁止直接跨任务裸读裸写
+// Global system state structure
+// All fields accessed via g_state_mutex to prevent cross-task data races
 // ============================================================================
 struct SystemState {
-    // ---- 温度数据 ----------------------------------------------------------
+    // ---- Temperature data ---------------------------------------------------
     float     cpu_temp;
     float     gpu_temp;
-    float     max_temp;       // 当前有效最大温度（用于控制算法）
-    bool      cpu_valid;      // CPU 数据是否在有效期内
-    bool      gpu_valid;      // GPU 数据是否在有效期内
-    uint32_t  last_cpu_ms;    // 上次收到 CPU 数据的时间戳
-    uint32_t  last_gpu_ms;    // 上次收到 GPU 数据的时间戳
+    float     max_temp;       // effective max temperature for control algorithm
+    bool      cpu_valid;      // CPU data within validity window
+    bool      gpu_valid;      // GPU data within validity window
+    uint32_t  last_cpu_ms;    // timestamp of last CPU data
+    uint32_t  last_gpu_ms;    // timestamp of last GPU data
 
-    // ---- 控制输出 ----------------------------------------------------------
+    // ---- Control output -----------------------------------------------------
     OpMode    mode;
-    uint8_t   target_duty;    // 控制任务计算出的目标占空比 (0-255)
-    uint8_t   current_duty;   // PWM 任务实际输出占空比 (0-255)
-    int       pwm_freq_hz;    // 当前 PWM 频率
+    uint8_t   target_duty;    // control-task computed target duty (0-255)
+    uint8_t   current_duty;   // PWM-task actual output duty (0-255)
+    int       pwm_freq_hz;    // current PWM frequency
 
-    // ---- 风扇曲线（运行时可变）-----------------------------------------------
+    // ---- Pending frequency change (set by bt_rx/button, applied by pwm) ----
+    bool      freq_change_pending;
+    int       pending_freq_hz;
+
+    // ---- Fan curve (mutable at runtime) -------------------------------------
     FanCurve  fan_curve;
 
-    // ---- 蓝牙发送队列 -------------------------------------------------------
-    QueueHandle_t tx_queue;   // 其他任务 push 帧字符串到队列，bt_tx 任务负责发送
+    // ---- Bluetooth TX queue -------------------------------------------------
+    QueueHandle_t tx_queue;   // other tasks push frame strings, bt_tx sends them
 
-    // ---- 查询待处理标志（由 bt_rx 设置，bt_tx 处理）--------------------------
+    // ---- Query pending flags (set by bt_rx, consumed by bt_tx) -------------
     bool      status_query_pending;
     bool      fcurve_query_pending;
 
-    // ---- UI 脏标记 ---------------------------------------------------------
-    bool      display_dirty;  // 为 true 时 UI 任务将在下次周期刷新 OLED
+    // ---- UI dirty flag ------------------------------------------------------
+    bool      display_dirty;  // when true, UI task refreshes OLED on next cycle
 
-    // ---- 安全状态 -----------------------------------------------------------
-    bool      safety_override; // 安全任务触发后置位，PWM 任务强制 100%，仅复位可清除
+    // ---- Safety state -------------------------------------------------------
+    bool      safety_override; // set by safety task, forces PWM 100%, only reset clears
 
-    // ---- 任务心跳（由安全任务监控）------------------------------------------
+    // ---- Task heartbeats (monitored by safety task) -------------------------
     volatile uint32_t heartbeat_bt_rx;
     volatile uint32_t heartbeat_bt_tx;
     volatile uint32_t heartbeat_control;
@@ -54,7 +58,7 @@ struct SystemState {
 };
 
 // ============================================================================
-// 全局实例与互斥量声明
+// Global instance and mutex declaration
 // ============================================================================
 extern SystemState        g_state;
 extern SemaphoreHandle_t  g_state_mutex;

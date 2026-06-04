@@ -1,11 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-
-using LibreHardwareMonitor.Hardware;
-using CPUwenduhuoqu;
 
 namespace CPUwenduhuoqu // CPU温度获取
 {

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
@@ -55,9 +55,14 @@ namespace CPUwenduhuoqu
 
         protected override void Dispose(bool disposing)
         {
-            if (disposing && (components != null))
+            if (disposing)
             {
-                components.Dispose();
+                components?.Dispose();
+                _headFont?.Dispose();
+                _tinyFont?.Dispose();
+                _dashFont?.Dispose();
+                _btnFont?.Dispose();
+                _logFont?.Dispose();
             }
             base.Dispose(disposing);
         }
@@ -175,7 +180,7 @@ namespace CPUwenduhuoqu
             this.checkBoxUseAida64Mode.TabIndex = 5;
             this.checkBoxUseAida64Mode.Text = "使用AIDA64获取硬件温度信息";
             this.checkBoxUseAida64Mode.UseVisualStyleBackColor = true;
-            this.checkBoxUseAida64Mode.CheckedChanged += new System.EventHandler(this.checkBox_useAida64Mode);
+            this.checkBoxUseAida64Mode.CheckedChanged += new System.EventHandler(this.checkBoxUseAida64Mode_CheckedChanged);
             // 
             // comboBoxChooseCpuMonitor
             // 

@@ -4,17 +4,18 @@
 #include "config.h"
 #include <BluetoothSerial.h>
 #include <string.h>
+#include <math.h>
 
 extern BluetoothSerial SerialBT;
 
 // ============================================================================
-// 蓝牙接收任务
-// 职责：轮询串口缓冲区，以 '\n' 为界提取完整帧，解析后按 FrameType 路由
-// 改进：
-//   - 缓冲区扩大至 128 字节，rx_idx 使用 size_t
-//   - 100ms 无新数据自动丢弃残缺帧
-//   - 移除 legacy 格式支持
-//   - 查询/设置类帧通过 tx_queue 触发应答
+//       
+//            '\n'             FrameType   
+//   
+//   -        128   rx_idx    size_t
+//   - 100ms            
+//   -    legacy     
+//   -   /       tx_queue     
 // ============================================================================
 void task_bt_rx(void *pvParameters)
 {
@@ -24,13 +25,13 @@ void task_bt_rx(void *pvParameters)
     ParsedFrame frame;
 
     for (;;) {
-        // 超时丢弃残缺帧（100ms 无新数据）
+        //        100ms     
         uint32_t now = millis();
         if (rx_idx > 0 && now - last_byte_ms > 100) {
             rx_idx = 0;
         }
 
-        // 读取所有可用字节
+        //         
         while (SerialBT.available()) {
             char c = SerialBT.read();
             last_byte_ms = now;
@@ -63,17 +64,17 @@ void task_bt_rx(void *pvParameters)
 
                             case FrameType::FCURVE_SET: {
                                 bool ok = true;
-                                // 验证曲线数据
+                                //       
                                 for (uint8_t i = 0; i < frame.fcurve.count; i++) {
                                     if (frame.fcurve.points[i].duty_percent > 100) ok = false;
                                     if (i > 0 && frame.fcurve.points[i].temperature <=
                                         frame.fcurve.points[i - 1].temperature) ok = false;
                                 }
-                                if (frame.fcurve.points[0].temperature != 0.0f) ok = false;
+                                if (fabsf(frame.fcurve.points[0].temperature) > 0.01f) ok = false;
 
                                 if (ok && g_state.tx_queue) {
                                     state_set_fan_curve(frame.fcurve.points, frame.fcurve.count);
-                                    // 发送 ACK
+                                    //    ACK
                                     char ack_buf[TX_BUF_SIZE];
                                     size_t ack_len = build_ack(ack_buf, TX_BUF_SIZE);
                                     if (ack_len > 0) {
@@ -81,7 +82,7 @@ void task_bt_rx(void *pvParameters)
                                         xQueueSend(g_state.tx_queue, ack_buf, 0);
                                     }
                                 } else if (g_state.tx_queue) {
-                                    // 发送 NACK
+                                    //    NACK
                                     char nack_buf[TX_BUF_SIZE];
                                     uint8_t code = ok ? 2 : 3;
                                     size_t nack_len = build_nack(nack_buf, TX_BUF_SIZE, code);
@@ -103,10 +104,10 @@ void task_bt_rx(void *pvParameters)
                                 break;
 
                             case FrameType::FREQ_SET:
-                                ledcSetup(PWM_CHANNEL, frame.ctrl.freq, PWM_RES_BITS);
-                                ledcWrite(PWM_CHANNEL, g_state.current_duty);
+                                // Defer ledcSetup to task_pwm to avoid concurrent LEDC access
                                 state_lock();
-                                g_state.pwm_freq_hz = frame.ctrl.freq;
+                                g_state.pending_freq_hz = frame.ctrl.freq;
+                                g_state.freq_change_pending = true;
                                 state_unlock();
                                 if (g_state.tx_queue) {
                                     char ack_buf[TX_BUF_SIZE];
@@ -141,7 +142,7 @@ void task_bt_rx(void *pvParameters)
                                 break;
                         }
                     } else {
-                        // 解析失败（校验和不匹配等），发送 NACK
+                        //               NACK
                         if (g_state.tx_queue) {
                             char nack_buf[TX_BUF_SIZE];
                             size_t nack_len = build_nack(nack_buf, TX_BUF_SIZE, 1);
@@ -156,12 +157,12 @@ void task_bt_rx(void *pvParameters)
             } else if (rx_idx < RX_BUF_SIZE - 1) {
                 rx_buf[rx_idx++] = c;
             } else {
-                // 缓冲区溢出，丢弃整帧
+                //          
                 rx_idx = 0;
             }
         }
 
-        // 更新心跳
+        //     
         state_lock();
         g_state.heartbeat_bt_rx = millis();
         state_unlock();

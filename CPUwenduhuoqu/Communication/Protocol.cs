@@ -27,8 +27,6 @@ namespace CPUwenduhuoqu.Communication
         public float GpuTemp;
         public bool CpuValid;
         public bool GpuValid;
-
-        public bool IsValid { get; set; }
     }
 
     public static class Protocol
@@ -165,7 +163,6 @@ namespace CPUwenduhuoqu.Communication
                 status.GpuTemp = float.Parse(parts[5], CultureInfo.InvariantCulture);
                 status.CpuValid = parts[6] == "1";
                 status.GpuValid = parts[7] == "1";
-                status.IsValid = true;
                 return true;
             }
             catch

@@ -4,12 +4,12 @@
 #include <esp_task_wdt.h>
 
 // ============================================================================
-// 安全监控任务
-// 周期：1 秒
-// 职责：
-//   1. 订阅 ESP32 任务看门狗，防止系统死锁
-//   2. 监控各业务任务的心跳计数器（含 bt_tx）
-//   3. 若检测到任务卡死，强制风扇 100%
+// Safety monitoring task
+// Period: 1s
+// Responsibilities:
+//   1. Subscribe to ESP32 task watchdog to prevent system deadlock
+//   2. Monitor heartbeat counters of core tasks (including bt_tx)
+//   3. On task hang detection, force fan to 100%
 // ============================================================================
 void task_safety(void *pvParameters)
 {
@@ -31,7 +31,7 @@ void task_safety(void *pvParameters)
         uint32_t now = millis();
         bool fault = false;
 
-        // 核心任务心跳超时判定
+        // Core task heartbeat timeout detection
         if (now - hb_bt_rx   > HEARTBEAT_TIMEOUT_MS) fault = true;
         if (now - hb_control > HEARTBEAT_TIMEOUT_MS) fault = true;
         if (now - hb_pwm     > HEARTBEAT_TIMEOUT_MS) fault = true;

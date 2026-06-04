@@ -2,13 +2,13 @@
 #include <string.h>
 
 // ============================================================================
-// 全局定义
+//     
 // ============================================================================
 SystemState       g_state;
 SemaphoreHandle_t g_state_mutex = nullptr;
 
 // ============================================================================
-// 初始化
+//    
 // ============================================================================
 bool state_init(void)
 {
@@ -16,9 +16,11 @@ bool state_init(void)
 
     g_state.mode           = OpMode::NORMAL;
     g_state.pwm_freq_hz    = PWM_FREQ_HZ;
-    g_state.target_duty    = static_cast<uint8_t>(map(20, 0, 100, 0, 255)); // 默认 20%
+    g_state.target_duty    = static_cast<uint8_t>(map(20, 0, 100, 0, 255)); //    20%
     g_state.current_duty   = 0;
-    g_state.display_dirty  = true;
+    g_state.freq_change_pending = false;
+    g_state.pending_freq_hz    = PWM_FREQ_HZ;
+    g_state.display_dirty       = true;
 
     g_state.cpu_valid      = false;
     g_state.gpu_valid      = false;
@@ -27,10 +29,10 @@ bool state_init(void)
     g_state.status_query_pending = false;
     g_state.fcurve_query_pending = false;
 
-    // 初始化运行时风扇曲线为默认值
+    //               
     g_state.fan_curve.reset_to_default();
 
-    // tx_queue 由 firmware.ino 在任务创建前设置
+    // tx_queue   firmware.ino         
     g_state.tx_queue = nullptr;
 
     g_state_mutex = xSemaphoreCreateMutex();
@@ -38,7 +40,7 @@ bool state_init(void)
 }
 
 // ============================================================================
-// 互斥锁包装
+//      
 // ============================================================================
 void state_lock(void)
 {
@@ -55,7 +57,7 @@ void state_unlock(void)
 }
 
 // ============================================================================
-// 带锁的快捷修改函数
+//          
 // ============================================================================
 void state_set_temp(bool is_cpu, float temp)
 {

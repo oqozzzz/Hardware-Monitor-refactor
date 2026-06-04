@@ -4,8 +4,8 @@
 #include <Arduino.h>
 
 // ============================================================================
-// 风扇曲线运行时模块
-// 取代编译期 constexpr 数组，支持通过蓝牙协议在线更新
+// Fan curve runtime module
+// Replaces compile-time constexpr array, supports online updates via BT protocol
 // ============================================================================
 
 #define MAX_CURVE_POINTS 10
@@ -18,17 +18,17 @@ struct FanCurvePoint {
 class FanCurve
 {
 public:
-    // 重置为 config.h 中的默认曲线
+    // Reset to default curve from config.h
     void reset_to_default();
 
-    // 运行时设置曲线点 (count ∈ [2, MAX_CURVE_POINTS])
-    // 返回 false 如果验证失败: 温度非严格递增 / duty 超出 0-100
+    // Set curve points at runtime (count in [2, MAX_CURVE_POINTS])
+    // Returns false if validation fails: temperature not strictly ascending / duty out of 0-100
     bool set_points(const FanCurvePoint *points, uint8_t count);
 
-    // 线性插值查询温度对应的占空比(%)
+    // Catmull-Rom spline interpolation query for duty cycle (%) at given temperature
     uint8_t lookup(float temp) const;
 
-    // 访问器
+    // Accessors
     uint8_t               get_count()  const { return _count; }
     const FanCurvePoint * get_points() const { return _points; }
 

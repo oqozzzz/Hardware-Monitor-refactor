@@ -18,6 +18,14 @@ namespace CPUwenduhuoqu
         private System.Windows.Forms.Timer _updateTimer;
         private StatusData _lastStatus;
         private bool _isExiting;
+        private bool _hasReceivedStatus;
+
+        // Shared font resources (disposed in Dispose override)
+        private Font _headFont;
+        private Font _tinyFont;
+        private Font _dashFont;
+        private Font _btnFont;
+        private Font _logFont;
 
         public MainForm()
         {
@@ -54,7 +62,7 @@ namespace CPUwenduhuoqu
             {
                 new MenuItem("显示主窗口", (s, ev) => { Show(); WindowState = FormWindowState.Normal; ShowInTaskbar = true; }),
                 new MenuItem("-"),
-                new MenuItem("退出程序", OnExit)
+                new MenuItem("退出程序", MenuItemExit_Click)
             });
         }
 
@@ -75,15 +83,18 @@ namespace CPUwenduhuoqu
             _updateTimer?.Stop();
             _updateTimer = null;
 
-            var svc = _serialService;
-            var mon = _monitor;
+            // 2. Unsubscribe events before disposing to prevent callbacks into disposed form
+            if (_serialService != null)
+            {
+                _serialService.ConnectionChanged -= OnConnectionChanged;
+                _serialService.DataReceived -= OnDataReceived;
+            }
+
+            // 3. Dispose synchronously (both are fast operations, no need for Task.Run)
+            _serialService?.Dispose();
+            _monitor?.Dispose();
             _serialService = null;
             _monitor = null;
-            Task.Run(() =>
-            {
-                svc?.Dispose();
-                mon?.Dispose();
-            });
 
             notifyIcon.Visible = false;
         }
@@ -104,7 +115,7 @@ namespace CPUwenduhuoqu
             ShowInTaskbar = true;
         }
 
-        private void OnExit(object sender, EventArgs e)
+        private void MenuItemExit_Click(object sender, EventArgs e)
         {
             _isExiting = true;
             _config.Save();
@@ -117,10 +128,18 @@ namespace CPUwenduhuoqu
 
         private void SwitchToLibreHardwareMonitor()
         {
-            _monitor?.Dispose();
-            _monitor = new LibreHardwareMonitorService();
-            toolStripStatusAida64CpuMonitor.Text = "来源: LibreHardwareMonitor";
-            toolStripStatusAida64GpuMonitor.Text = "";
+            try
+            {
+                _monitor?.Dispose();
+                _monitor = new LibreHardwareMonitorService();
+                toolStripStatusAida64CpuMonitor.Text = "来源: LibreHardwareMonitor";
+                toolStripStatusAida64GpuMonitor.Text = "";
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("初始化 LibreHardwareMonitor 时出错\n" + ex.Message,
+                    "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private void SwitchToAida64()
@@ -128,7 +147,7 @@ namespace CPUwenduhuoqu
             var aida = new Aida64MonitorService();
             if (!aida.LoadSensors())
             {
-                MessageBox.Show("未在注册表中找到 AIDA64 传感器。\n请检查 AIDA64 配置。",
+                MessageBox.Show("未找到 AIDA64 传感器。\n" + aida.LastErrorMessage + "\n请检查 AIDA64 是否正在运行且已启用注册表共享。",
                     "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 checkBoxUseAida64Mode.Checked = false;
                 aida.Dispose();
@@ -177,6 +196,17 @@ namespace CPUwenduhuoqu
             return true;
         }
 
+        private bool CheckReadyForRemote()
+        {
+            if (!CheckConnected()) return false;
+            if (!_hasReceivedStatus)
+            {
+                MessageBox.Show("尚未收到固件状态数据，请稍候。", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return false;
+            }
+            return true;
+        }
+
         // ====================================================================
         // Timer & Data Sending
         // ====================================================================
@@ -214,7 +244,7 @@ namespace CPUwenduhuoqu
                 {
                     var (cpuTemp, gpuTemp) = _monitor.ReadTemperatures();
 
-                    cpuTempLabel.Invoke(new Action(() =>
+                    BeginInvoke(new Action(() =>
                     {
                         cpuTempLabel.Text = $"CPU 温度: {(cpuTemp.HasValue ? cpuTemp.Value.ToString("F1") + " °C" : "无数据")}";
                         gpuTempLabel.Text = $"GPU 温度: {(gpuTemp.HasValue ? gpuTemp.Value.ToString("F1") + " °C" : "无数据")}";
@@ -299,16 +329,22 @@ namespace CPUwenduhuoqu
         private void OnConnectionChanged(object s, bool connected)
         {
             if (IsDisposed) return;
+            try
+            {
             BeginInvoke(new Action(() =>
             {
                 if (IsDisposed) return;
                 labelConnectionStatus.Text = connected ? "已连接" : "已断开";
             }));
+            }
+            catch (ObjectDisposedException) { }
         }
 
         private void OnDataReceived(object s, string frame)
         {
             if (IsDisposed) return;
+            try
+            {
             BeginInvoke(new Action(() =>
             {
                 if (IsDisposed) return;
@@ -321,6 +357,8 @@ namespace CPUwenduhuoqu
                         UpdateDashboard(status);
                     }
             }));
+            }
+            catch (ObjectDisposedException) { }
         }
 
         // ====================================================================
@@ -370,35 +408,35 @@ namespace CPUwenduhuoqu
 
         private void BtnRemoteMode_Click(object sender, EventArgs e)
         {
-            if (!CheckConnected()) return;
+            if (!CheckReadyForRemote()) return;
             int nextMode = (_lastStatus.Mode % 4) + 1;
             Task.Run(() => _serialService.Send(Protocol.BuildModeSet(nextMode)));
         }
 
         private void BtnRemoteFreqUp_Click(object sender, EventArgs e)
         {
-            if (!CheckConnected()) return;
+            if (!CheckReadyForRemote()) return;
             int newFreq = Math.Min(_lastStatus.FreqHz + 200, 40000);
             Task.Run(() => _serialService.Send(Protocol.BuildFreqSet(newFreq)));
         }
 
         private void BtnRemoteFreqDn_Click(object sender, EventArgs e)
         {
-            if (!CheckConnected()) return;
+            if (!CheckReadyForRemote()) return;
             int newFreq = Math.Max(_lastStatus.FreqHz - 200, 1000);
             Task.Run(() => _serialService.Send(Protocol.BuildFreqSet(newFreq)));
         }
 
         private void BtnRemoteDutyUp_Click(object sender, EventArgs e)
         {
-            if (!CheckConnected()) return;
+            if (!CheckReadyForRemote()) return;
             int newDuty = Math.Min(_lastStatus.DutyPercent + 10, 100);
             Task.Run(() => _serialService.Send(Protocol.BuildDutySet(newDuty)));
         }
 
         private void BtnRemoteDutyDn_Click(object sender, EventArgs e)
         {
-            if (!CheckConnected()) return;
+            if (!CheckReadyForRemote()) return;
             int newDuty = Math.Max(_lastStatus.DutyPercent - 10, 0);
             Task.Run(() => _serialService.Send(Protocol.BuildDutySet(newDuty)));
         }
@@ -407,7 +445,7 @@ namespace CPUwenduhuoqu
         // AIDA64 Mode & Sensor Selection
         // ====================================================================
 
-        private void checkBox_useAida64Mode(object sender, EventArgs e)
+        private void checkBoxUseAida64Mode_CheckedChanged(object sender, EventArgs e)
         {
             if (checkBoxUseAida64Mode.Checked)
             {
@@ -499,13 +537,13 @@ namespace CPUwenduhuoqu
 
         private void BuildDashboard()
         {
-            var headFont = new Font("Microsoft YaHei UI", 10F, FontStyle.Bold);
-            var tinyFont = new Font("Microsoft YaHei UI", 8F);
+            _headFont = new Font("Microsoft YaHei UI", 10F, FontStyle.Bold);
+            _tinyFont = new Font("Microsoft YaHei UI", 8F);
 
             // Row A: 标题标签
-            DashLabel("模式:", 10, 8, headFont);
-            DashLabel("风扇:", 170, 8, headFont);
-            DashLabel("频率:", 330, 8, headFont);
+            DashLabel("模式:", 10, 8, _headFont);
+            DashLabel("风扇:", 170, 8, _headFont);
+            DashLabel("频率:", 330, 8, _headFont);
 
             // 分隔线
             dashboardPanel.Controls.Add(new Label
@@ -516,32 +554,34 @@ namespace CPUwenduhuoqu
             });
 
             // Row B: CPU / GPU 标题
-            DashLabel("CPU:", 10, 50, headFont);
-            DashLabel("GPU:", 230, 50, headFont);
+            DashLabel("CPU:", 10, 50, _headFont);
+            DashLabel("GPU:", 230, 50, _headFont);
 
             // Row C: 更新时间标题
-            DashLabel("最后更新:", 10, 82, tinyFont);
+            DashLabel("最后更新:", 10, 82, _tinyFont);
 
             // 设置运行时字体
-            lblDashMode.Font = new Font("Consolas", 11F, FontStyle.Bold);
-            lblDashFan.Font = new Font("Consolas", 11F, FontStyle.Bold);
-            lblDashFreq.Font = new Font("Consolas", 11F, FontStyle.Bold);
-            lblDashCpuTemp.Font = new Font("Consolas", 11F, FontStyle.Bold);
-            lblDashGpuTemp.Font = new Font("Consolas", 11F, FontStyle.Bold);
-            lblDashCpuOk.Font = tinyFont;
-            lblDashGpuOk.Font = tinyFont;
-            lblDashUpdate.Font = tinyFont;
+            _dashFont = new Font("Consolas", 11F, FontStyle.Bold);
+            lblDashMode.Font = _dashFont;
+            lblDashFan.Font = _dashFont;
+            lblDashFreq.Font = _dashFont;
+            lblDashCpuTemp.Font = _dashFont;
+            lblDashGpuTemp.Font = _dashFont;
+            lblDashCpuOk.Font = _tinyFont;
+            lblDashGpuOk.Font = _tinyFont;
+            lblDashUpdate.Font = _tinyFont;
 
             // 设置按钮字体
-            var btnFont = new Font("Microsoft YaHei UI", 8F);
-            btnRemoteMode.Font = btnFont;
-            btnRemoteFreqUp.Font = btnFont;
-            btnRemoteFreqDn.Font = btnFont;
-            btnRemoteDutyUp.Font = btnFont;
-            btnRemoteDutyDn.Font = btnFont;
+            _btnFont = new Font("Microsoft YaHei UI", 8F);
+            btnRemoteMode.Font = _btnFont;
+            btnRemoteFreqUp.Font = _btnFont;
+            btnRemoteFreqDn.Font = _btnFont;
+            btnRemoteDutyUp.Font = _btnFont;
+            btnRemoteDutyDn.Font = _btnFont;
 
             // 日志文本框字体
-            txtStatusLog.Font = new Font("Consolas", 8F);
+            _logFont = new Font("Consolas", 8F);
+            txtStatusLog.Font = _logFont;
         }
 
         private void BuildFanCurveData()
@@ -587,8 +627,10 @@ namespace CPUwenduhuoqu
 
         private void UpdateDashboard(StatusData s)
         {
-            if (!isDashboardMode) return;
             _lastStatus = s;
+            _hasReceivedStatus = true;
+
+            if (!isDashboardMode) return;
 
             string modeStr;
             switch (s.Mode)
