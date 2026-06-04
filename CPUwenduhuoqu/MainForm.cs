@@ -75,15 +75,18 @@ namespace CPUwenduhuoqu
             _updateTimer?.Stop();
             _updateTimer = null;
 
-            var svc = _serialService;
-            var mon = _monitor;
+            // 2. Unsubscribe events before disposing to prevent callbacks into disposed form
+            if (_serialService != null)
+            {
+                _serialService.ConnectionChanged -= OnConnectionChanged;
+                _serialService.DataReceived -= OnDataReceived;
+            }
+
+            // 3. Dispose synchronously (both are fast operations, no need for Task.Run)
+            _serialService?.Dispose();
+            _monitor?.Dispose();
             _serialService = null;
             _monitor = null;
-            Task.Run(() =>
-            {
-                svc?.Dispose();
-                mon?.Dispose();
-            });
 
             notifyIcon.Visible = false;
         }
