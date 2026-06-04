@@ -18,7 +18,9 @@ bool state_init(void)
     g_state.pwm_freq_hz    = PWM_FREQ_HZ;
     g_state.target_duty    = static_cast<uint8_t>(map(20, 0, 100, 0, 255)); // 默认 20%
     g_state.current_duty   = 0;
-    g_state.display_dirty  = true;
+    g_state.freq_change_pending = false;
+    g_state.pending_freq_hz    = PWM_FREQ_HZ;
+    g_state.display_dirty       = true;
 
     g_state.cpu_valid      = false;
     g_state.gpu_valid      = false;

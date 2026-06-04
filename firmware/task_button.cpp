@@ -43,9 +43,10 @@ static void on_button_pressed(int idx)
         case 1: {
             freq += 200;
             if (freq > PWM_FREQ_MAX) freq = PWM_FREQ_MAX;
-            ledcSetup(PWM_CHANNEL, freq, PWM_RES_BITS);
+            // Defer ledcSetup to task_pwm to avoid concurrent LEDC access
             state_lock();
-            g_state.pwm_freq_hz = freq;
+            g_state.pending_freq_hz = freq;
+            g_state.freq_change_pending = true;
             g_state.display_dirty = true;
             state_unlock();
             break;
@@ -57,9 +58,10 @@ static void on_button_pressed(int idx)
         case 2: {
             freq -= 200;
             if (freq < PWM_FREQ_MIN) freq = PWM_FREQ_MIN;
-            ledcSetup(PWM_CHANNEL, freq, PWM_RES_BITS);
+            // Defer ledcSetup to task_pwm to avoid concurrent LEDC access
             state_lock();
-            g_state.pwm_freq_hz = freq;
+            g_state.pending_freq_hz = freq;
+            g_state.freq_change_pending = true;
             g_state.display_dirty = true;
             state_unlock();
             break;

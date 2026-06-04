@@ -103,10 +103,10 @@ void task_bt_rx(void *pvParameters)
                                 break;
 
                             case FrameType::FREQ_SET:
-                                ledcSetup(PWM_CHANNEL, frame.ctrl.freq, PWM_RES_BITS);
-                                ledcWrite(PWM_CHANNEL, g_state.current_duty);
+                                // Defer ledcSetup to task_pwm to avoid concurrent LEDC access
                                 state_lock();
-                                g_state.pwm_freq_hz = frame.ctrl.freq;
+                                g_state.pending_freq_hz = frame.ctrl.freq;
+                                g_state.freq_change_pending = true;
                                 state_unlock();
                                 if (g_state.tx_queue) {
                                     char ack_buf[TX_BUF_SIZE];

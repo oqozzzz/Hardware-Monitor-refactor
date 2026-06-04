@@ -3,12 +3,13 @@
 #include "config.h"
 
 // ============================================================================
-// PWM 输出任务
-// 周期：50ms
-// 职责：
-//   1. 从全局状态读取 target_duty
-//   2. 以斜坡限制逐步逼近目标值，避免风扇转速突变
-//   3. 写入 LEDC 并回写 current_duty
+// PWM output task
+// Period: 50ms
+// Responsibilities:
+//   1. Read target_duty from global state
+//   2. Ramp toward target with rate limiting (PWM_RAMP_STEP per cycle)
+//   3. Apply pending frequency changes from bt_rx/button tasks
+//   4. Write LEDC output and update current_duty
 // ============================================================================
 void task_pwm(void *pvParameters)
 {
@@ -21,7 +22,18 @@ void task_pwm(void *pvParameters)
         state_lock();
         bool override = g_state.safety_override;
         uint8_t target = g_state.target_duty;
+        bool freq_pending = g_state.freq_change_pending;
+        int new_freq = g_state.pending_freq_hz;
+        if (freq_pending) {
+            g_state.freq_change_pending = false;
+            g_state.pwm_freq_hz = new_freq;
+        }
         state_unlock();
+
+        // Apply frequency change in this task to avoid concurrent LEDC access
+        if (freq_pending) {
+            ledcSetup(PWM_CHANNEL, new_freq, PWM_RES_BITS);
+        }
 
         if (override) {
             current = PWM_MAX_DUTY;
