@@ -1,6 +1,5 @@
 using System;
 using System.Linq;
-using System.Windows.Forms;
 using LibreHardwareMonitor.Hardware;
 
 namespace CPUwenduhuoqu.Hardware
@@ -22,36 +21,28 @@ namespace CPUwenduhuoqu.Hardware
                 IsGpuEnabled = true
             };
 
-            try
-            {
-                _computer.Open();
-                _computer.Accept(new UpdateVisitor());
+            _computer.Open();
+            _computer.Accept(new UpdateVisitor());
 
-                // 预枚举传感器引用，避免每次 ReadTemperatures() 遍历整个硬件树
-                foreach (IHardware hardware in _computer.Hardware)
+            // Pre-cache sensor references to avoid traversing the entire hardware tree each read
+            foreach (IHardware hardware in _computer.Hardware)
+            {
+                foreach (ISensor sensor in hardware.Sensors)
                 {
-                    foreach (ISensor sensor in hardware.Sensors)
+                    if (sensor.SensorType == SensorType.Temperature)
                     {
-                        if (sensor.SensorType == SensorType.Temperature)
+                        if (hardware.HardwareType == HardwareType.Cpu && _cpuSensor == null)
                         {
-                            if (hardware.HardwareType == HardwareType.Cpu && _cpuSensor == null)
-                            {
-                                _cpuSensor = sensor;
-                            }
-                            else if ((hardware.HardwareType == HardwareType.GpuAmd ||
-                                      hardware.HardwareType == HardwareType.GpuNvidia) &&
-                                     _gpuSensor == null)
-                            {
-                                _gpuSensor = sensor;
-                            }
+                            _cpuSensor = sensor;
+                        }
+                        else if ((hardware.HardwareType == HardwareType.GpuAmd ||
+                                  hardware.HardwareType == HardwareType.GpuNvidia) &&
+                                 _gpuSensor == null)
+                        {
+                            _gpuSensor = sensor;
                         }
                     }
                 }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"初始化 LibreHardwareMonitor 时出错:\n{ex.Message}",
-                    "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 

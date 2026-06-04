@@ -121,10 +121,18 @@ namespace CPUwenduhuoqu
 
         private void SwitchToLibreHardwareMonitor()
         {
-            _monitor?.Dispose();
-            _monitor = new LibreHardwareMonitorService();
-            toolStripStatusAida64CpuMonitor.Text = "来源: LibreHardwareMonitor";
-            toolStripStatusAida64GpuMonitor.Text = "";
+            try
+            {
+                _monitor?.Dispose();
+                _monitor = new LibreHardwareMonitorService();
+                toolStripStatusAida64CpuMonitor.Text = "来源: LibreHardwareMonitor";
+                toolStripStatusAida64GpuMonitor.Text = "";
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("初始化 LibreHardwareMonitor 时出错\n" + ex.Message,
+                    "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private void SwitchToAida64()
