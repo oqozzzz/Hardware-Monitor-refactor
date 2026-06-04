@@ -60,10 +60,6 @@ void task_control(void *pvParameters)
             gpu_ok = false;
         }
 
-        // Copy fan curve snapshot
-        FanCurve curve = g_state.fan_curve;
-        state_unlock();
-
         // Calculate effective max temperature
         float effective_temp = 0.0f;
         if (cpu_ok && gpu_ok) {
@@ -76,12 +72,16 @@ void task_control(void *pvParameters)
             effective_temp = 100.0f; // Both sources lost: safety mode full speed
         }
 
-        state_lock();
         g_state.max_temp = effective_temp;
+
+        // Perform lookup inside lock to avoid copying entire FanCurve
+        uint8_t target = 0;
+        if (mode != OpMode::MANUAL) {
+            target = calculate_target_duty(effective_temp, mode, g_state.fan_curve);
+        }
         state_unlock();
 
         if (mode != OpMode::MANUAL) {
-            uint8_t target = calculate_target_duty(effective_temp, mode, curve);
             state_set_target_duty(target);
         }
 
