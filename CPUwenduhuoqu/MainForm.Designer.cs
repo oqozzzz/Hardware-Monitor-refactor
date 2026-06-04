@@ -55,9 +55,14 @@ namespace CPUwenduhuoqu
 
         protected override void Dispose(bool disposing)
         {
-            if (disposing && (components != null))
+            if (disposing)
             {
-                components.Dispose();
+                components?.Dispose();
+                _headFont?.Dispose();
+                _tinyFont?.Dispose();
+                _dashFont?.Dispose();
+                _btnFont?.Dispose();
+                _logFont?.Dispose();
             }
             base.Dispose(disposing);
         }

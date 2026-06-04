@@ -20,6 +20,13 @@ namespace CPUwenduhuoqu
         private bool _isExiting;
         private bool _hasReceivedStatus;
 
+        // Shared font resources (disposed in Dispose override)
+        private Font _headFont;
+        private Font _tinyFont;
+        private Font _dashFont;
+        private Font _btnFont;
+        private Font _logFont;
+
         public MainForm()
         {
             InitializeComponent();
@@ -530,13 +537,13 @@ namespace CPUwenduhuoqu
 
         private void BuildDashboard()
         {
-            var headFont = new Font("Microsoft YaHei UI", 10F, FontStyle.Bold);
-            var tinyFont = new Font("Microsoft YaHei UI", 8F);
+            _headFont = new Font("Microsoft YaHei UI", 10F, FontStyle.Bold);
+            _tinyFont = new Font("Microsoft YaHei UI", 8F);
 
             // Row A: 标题标签
-            DashLabel("模式:", 10, 8, headFont);
-            DashLabel("风扇:", 170, 8, headFont);
-            DashLabel("频率:", 330, 8, headFont);
+            DashLabel("模式:", 10, 8, _headFont);
+            DashLabel("风扇:", 170, 8, _headFont);
+            DashLabel("频率:", 330, 8, _headFont);
 
             // 分隔线
             dashboardPanel.Controls.Add(new Label
@@ -547,32 +554,34 @@ namespace CPUwenduhuoqu
             });
 
             // Row B: CPU / GPU 标题
-            DashLabel("CPU:", 10, 50, headFont);
-            DashLabel("GPU:", 230, 50, headFont);
+            DashLabel("CPU:", 10, 50, _headFont);
+            DashLabel("GPU:", 230, 50, _headFont);
 
             // Row C: 更新时间标题
-            DashLabel("最后更新:", 10, 82, tinyFont);
+            DashLabel("最后更新:", 10, 82, _tinyFont);
 
             // 设置运行时字体
-            lblDashMode.Font = new Font("Consolas", 11F, FontStyle.Bold);
-            lblDashFan.Font = new Font("Consolas", 11F, FontStyle.Bold);
-            lblDashFreq.Font = new Font("Consolas", 11F, FontStyle.Bold);
-            lblDashCpuTemp.Font = new Font("Consolas", 11F, FontStyle.Bold);
-            lblDashGpuTemp.Font = new Font("Consolas", 11F, FontStyle.Bold);
-            lblDashCpuOk.Font = tinyFont;
-            lblDashGpuOk.Font = tinyFont;
-            lblDashUpdate.Font = tinyFont;
+            _dashFont = new Font("Consolas", 11F, FontStyle.Bold);
+            lblDashMode.Font = _dashFont;
+            lblDashFan.Font = _dashFont;
+            lblDashFreq.Font = _dashFont;
+            lblDashCpuTemp.Font = _dashFont;
+            lblDashGpuTemp.Font = _dashFont;
+            lblDashCpuOk.Font = _tinyFont;
+            lblDashGpuOk.Font = _tinyFont;
+            lblDashUpdate.Font = _tinyFont;
 
             // 设置按钮字体
-            var btnFont = new Font("Microsoft YaHei UI", 8F);
-            btnRemoteMode.Font = btnFont;
-            btnRemoteFreqUp.Font = btnFont;
-            btnRemoteFreqDn.Font = btnFont;
-            btnRemoteDutyUp.Font = btnFont;
-            btnRemoteDutyDn.Font = btnFont;
+            _btnFont = new Font("Microsoft YaHei UI", 8F);
+            btnRemoteMode.Font = _btnFont;
+            btnRemoteFreqUp.Font = _btnFont;
+            btnRemoteFreqDn.Font = _btnFont;
+            btnRemoteDutyUp.Font = _btnFont;
+            btnRemoteDutyDn.Font = _btnFont;
 
             // 日志文本框字体
-            txtStatusLog.Font = new Font("Consolas", 8F);
+            _logFont = new Font("Consolas", 8F);
+            txtStatusLog.Font = _logFont;
         }
 
         private void BuildFanCurveData()
