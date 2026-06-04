@@ -4,7 +4,7 @@
 #include <Arduino.h>
 
 // ============================================================================
-// 硬件引脚定义
+// Hardware pin definitions
 // ============================================================================
 constexpr int PIN_PWM_FAN      = 5;
 constexpr int PIN_BTN_MODE     = 12;
@@ -17,14 +17,14 @@ constexpr int BTN_COUNT = 5;
 extern const int BUTTON_PINS[BTN_COUNT];
 
 // ============================================================================
-// OLED 显示屏参数
+// OLED display parameters
 // ============================================================================
 constexpr int SCREEN_WIDTH  = 128;
 constexpr int SCREEN_HEIGHT = 64;
 constexpr int OLED_RESET    = -1;
 
 // ============================================================================
-// PWM 参数（25kHz 是 PC 风扇标准 PWM 频率，静音且兼容性好）
+// PWM parameters (25kHz is the standard PC fan PWM frequency)
 // ============================================================================
 constexpr int PWM_CHANNEL    = 0;
 constexpr int PWM_FREQ_HZ    = 25000;
@@ -34,8 +34,9 @@ constexpr int PWM_FREQ_MIN   = 1000;
 constexpr int PWM_FREQ_MAX   = 40000;
 
 // ============================================================================
-// 默认风扇曲线：温度 -> 目标占空比(%)
-// 用作 FanCurve::reset_to_default() 的初始值，运行时可被 FCURVE_SET 协议覆盖
+// Default fan curve: temperature -> target duty (%)
+// Used as initial values for FanCurve::reset_to_default(), overridable at
+// runtime via FCURVE_SET protocol command
 // ============================================================================
 struct DefaultFanCurvePoint {
     float temp;
@@ -53,17 +54,17 @@ static const DefaultFanCurvePoint DEFAULT_FAN_CURVE[] = {
 };
 constexpr int DEFAULT_FAN_CURVE_POINTS = sizeof(DEFAULT_FAN_CURVE) / sizeof(DEFAULT_FAN_CURVE[0]);
 
-constexpr float TEMP_HYSTERESIS = 3.0f; // 滞回带，防止在阈值附近抖动
+constexpr float TEMP_HYSTERESIS = 3.0f; // Hysteresis to prevent oscillation near thresholds
 
 // ============================================================================
-// PWM 斜坡限制：防止风扇转速突变产生噪声
+// PWM ramp rate limit: prevents sudden speed changes that cause noise
 // ============================================================================
-constexpr int PWM_RAMP_STEP         = 3;    // 每周期最大变化量 (0-255)
-constexpr uint32_t PWM_PERIOD_MS    = 50;   // PWM 任务周期
+constexpr int PWM_RAMP_STEP         = 3;    // Max change per cycle (0-255)
+constexpr uint32_t PWM_PERIOD_MS    = 50;   // PWM task period
 
 // ============================================================================
-// 任务堆栈大小（字节）
-// 注意：UI 任务需要较大堆栈，因为 Adafruit GFX 的 display() 较耗栈
+// Task stack sizes (bytes)
+// Note: UI task needs larger stack because Adafruit GFX display() is stack-heavy
 // ============================================================================
 constexpr uint32_t STACK_BT_RX    = 4096;
 constexpr uint32_t STACK_BT_TX    = 4096;
@@ -74,7 +75,7 @@ constexpr uint32_t STACK_BUTTON   = 2048;
 constexpr uint32_t STACK_SAFETY   = 2048;
 
 // ============================================================================
-// 任务优先级（数字越大优先级越高，范围 0-24）
+// Task priorities (higher number = higher priority, range 0-24)
 // ============================================================================
 constexpr UBaseType_t PRIO_BT_RX   = 3;
 constexpr UBaseType_t PRIO_BT_TX   = 2;
@@ -85,7 +86,7 @@ constexpr UBaseType_t PRIO_BUTTON  = 3;
 constexpr UBaseType_t PRIO_SAFETY  = 2;
 
 // ============================================================================
-// 任务周期（毫秒）
+// Task periods (milliseconds)
 // ============================================================================
 constexpr uint32_t INTERVAL_CONTROL_MS = 100;
 constexpr uint32_t INTERVAL_UI_MS      = 100;
@@ -93,32 +94,32 @@ constexpr uint32_t INTERVAL_BUTTON_MS  = 20;
 constexpr uint32_t INTERVAL_SAFETY_MS  = 1000;
 
 // ============================================================================
-// 按钮消抖参数
+// Button debounce parameters
 // ============================================================================
-constexpr uint8_t BTN_DEBOUNCE_COUNT = 3; // 3 * 20ms = 60ms 消抖时间
+constexpr uint8_t BTN_DEBOUNCE_COUNT = 3; // 3 * 20ms = 60ms debounce window
 
 // ============================================================================
-// 蓝牙协议缓冲区
+// Bluetooth protocol buffer sizes
 // ============================================================================
 constexpr size_t RX_BUF_SIZE = 128;
 constexpr size_t TX_BUF_SIZE = 80;
 constexpr size_t TX_QUEUE_SIZE = 8;
 
 // ============================================================================
-// 安全与看门狗
+// Safety and watchdog
 // ============================================================================
 constexpr uint32_t WATCHDOG_TIMEOUT_S   = 5;
-constexpr uint32_t HEARTBEAT_TIMEOUT_MS = 3000; // 任务心跳超时判定
-constexpr uint32_t DATA_TIMEOUT_MS      = 5000; // 温度数据超时（蓝牙断开保护）
+constexpr uint32_t HEARTBEAT_TIMEOUT_MS = 3000; // Task heartbeat timeout threshold
+constexpr uint32_t DATA_TIMEOUT_MS      = 5000; // Temperature data timeout (BT disconnect guard)
 
 // ============================================================================
-// 运行模式
+// Run modes
 // ============================================================================
 enum class OpMode : uint8_t {
-    QUIET  = 1, // 50% 曲线输出
-    NORMAL = 2, // 75% 曲线输出
-    TURBO  = 3, // 100% 曲线输出
-    MANUAL = 4  // 按钮手动控制占空比
+    QUIET  = 1, // gamma=1.6, quieter at low load
+    NORMAL = 2, // gamma=1.2, balanced
+    TURBO  = 3, // gamma=0.85, early ramp-up
+    MANUAL = 4  // direct button/remote duty control
 };
 
 #endif // CONFIG_H

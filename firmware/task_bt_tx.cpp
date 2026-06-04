@@ -8,19 +8,19 @@
 extern BluetoothSerial SerialBT;
 
 // ============================================================================
-// 蓝牙发送任务
-// 周期：50ms
-// 职责：
-//   1. 从 tx_queue 中取出待发送帧，通过 SerialBT 发出
-//   2. 处理 status_query_pending / fcurve_query_pending 标志
-//   3. 每 2 秒自动发送一次 STATUS_RSP 遥测帧
+// Bluetooth transmit task
+// Period: 50ms
+// Responsibilities:
+//   1. Dequeue pending frames from tx_queue and send via SerialBT
+//   2. Handle status_query_pending / fcurve_query_pending flags
+//   3. Send STATUS_RSP telemetry every 2 seconds
 // ============================================================================
 void task_bt_tx(void *pvParameters)
 {
     TickType_t last_wake = xTaskGetTickCount();
     uint32_t   last_telemetry_ms = 0;
 
-    // 共享发送缓冲区（静态分配，避免多次在栈上分配 80 字节）
+    // Shared TX buffer (static allocation to avoid repeated 80-byte stack allocation)
     static char tx_buf[TX_BUF_SIZE];
 
     for (;;) {
@@ -30,7 +30,7 @@ void task_bt_tx(void *pvParameters)
 
         uint32_t now = millis();
 
-        // ---- 读取状态快照 ----
+        // ---- Read state snapshot ----
         state_lock();
         bool status_pending  = g_state.status_query_pending;
         bool fcurve_pending  = g_state.fcurve_query_pending;
@@ -52,7 +52,7 @@ void task_bt_tx(void *pvParameters)
 
         uint8_t duty_pct = map(duty_raw, 0, 255, 0, 100);
 
-        // ---- 处理 STATUS_QUERY ----
+        // ---- Handle STATUS_QUERY ----
         if (status_pending) {
             size_t len = build_status_response(tx_buf, TX_BUF_SIZE,
                 static_cast<int>(mode), duty_pct, freq,
@@ -66,7 +66,7 @@ void task_bt_tx(void *pvParameters)
             state_unlock();
         }
 
-        // ---- 处理 FCURVE_QUERY ----
+        // ---- Handle FCURVE_QUERY ----
         if (fcurve_pending) {
             state_lock();
             uint8_t count = g_state.fan_curve.get_count();
@@ -83,12 +83,12 @@ void task_bt_tx(void *pvParameters)
             state_unlock();
         }
 
-        // ---- 处理队列中的待发送帧 (ACK/NACK) ----
+        // ---- Drain pending TX queue (ACK/NACK) ----
         while (xQueueReceive(g_state.tx_queue, tx_buf, 0) == pdTRUE) {
             SerialBT.println(tx_buf);
         }
 
-        // ---- 定期遥测 (每 2 秒) ----
+        // ---- Periodic telemetry (every 2s) ----
         if (now - last_telemetry_ms >= 2000) {
             size_t len = build_status_response(tx_buf, TX_BUF_SIZE,
                 static_cast<int>(mode), duty_pct, freq,
@@ -100,7 +100,7 @@ void task_bt_tx(void *pvParameters)
             last_telemetry_ms = now;
         }
 
-        // 更新心跳
+        // Update heartbeat
         state_lock();
         g_state.heartbeat_bt_tx = millis();
         state_unlock();

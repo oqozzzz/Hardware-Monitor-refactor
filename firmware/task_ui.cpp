@@ -4,11 +4,11 @@
 #include "system_state.h"
 #include "config.h"
 
-// 由 firmware.ino 实例化的全局显示对象
+// Global display instance from firmware.ino
 extern Adafruit_SSD1306 display;
 
 // ============================================================================
-// 模式枚举转显示字符串
+// Mode name string for display
 // ============================================================================
 static const char* mode_to_string(OpMode mode)
 {
@@ -22,7 +22,7 @@ static const char* mode_to_string(OpMode mode)
 }
 
 // ============================================================================
-// 模式系数提示文字
+// Mode coefficient hint text
 // ============================================================================
 static const char* mode_hint(OpMode mode)
 {
@@ -36,11 +36,11 @@ static const char* mode_hint(OpMode mode)
 }
 
 // ============================================================================
-// 绘制左上象限：运行模式 (0,0) - (62,30)
+// Draw upper-left quadrant: run mode (0,0)-(62,30)
 // ============================================================================
 static void draw_mode_quadrant(OpMode mode)
 {
-    // 标签行：MODE + 系数提示
+    // Label row: MODE + coefficient hint
     display.setTextSize(1);
     display.setCursor(3, 3);
     display.print(F("MODE"));
@@ -49,24 +49,24 @@ static void draw_mode_quadrant(OpMode mode)
         display.print(mode_hint(mode));
     }
 
-    // 模式名称
+    // Mode name
     display.setCursor(4, 14);
     display.print(mode_to_string(mode));
 }
 
 // ============================================================================
-// 绘制右上象限：风扇状态 (66,0) - (126,30)
+// Draw upper-right quadrant: fan status (66,0)-(126,30)
 // ============================================================================
 static void draw_fan_quadrant(uint8_t duty, int freq)
 {
-    // 标签行
+    // Label row
     display.setTextSize(1);
     display.setCursor(67, 3);
     display.print(F("FAN "));
     display.print(freq / 1000);
     display.print(F("k"));
 
-    // 占空比
+    // Duty cycle
     uint8_t duty_pct = map(duty, 0, 255, 0, 100);
     display.setCursor(68, 14);
     display.print(duty_pct);
@@ -74,11 +74,11 @@ static void draw_fan_quadrant(uint8_t duty, int freq)
 }
 
 // ============================================================================
-// 绘制左下象限：CPU 温度 (0,34) - (62,62)
+// Draw lower-left quadrant: CPU temperature (0,34)-(62,62)
 // ============================================================================
 static void draw_cpu_quadrant(float temp, bool valid)
 {
-    // 标签
+    // Label
     display.setTextSize(1);
     display.setCursor(3, 35);
     display.print(F("CPU"));
@@ -86,7 +86,7 @@ static void draw_cpu_quadrant(float temp, bool valid)
         display.print(F(" !"));
     }
 
-    // 温度值
+    // Temperature value
     display.setCursor(4, 46);
     if (valid) {
         display.print(temp, 1);
@@ -97,11 +97,11 @@ static void draw_cpu_quadrant(float temp, bool valid)
 }
 
 // ============================================================================
-// 绘制右下象限：GPU 温度 (66,34) - (126,62)
+// Draw lower-right quadrant: GPU temperature (66,34)-(126,62)
 // ============================================================================
 static void draw_gpu_quadrant(float temp, bool valid)
 {
-    // 标签
+    // Label
     display.setTextSize(1);
     display.setCursor(67, 35);
     display.print(F("GPU"));
@@ -109,7 +109,7 @@ static void draw_gpu_quadrant(float temp, bool valid)
         display.print(F(" !"));
     }
 
-    // 温度值
+    // Temperature value
     display.setCursor(68, 46);
     if (valid) {
         display.print(temp, 1);
@@ -120,20 +120,20 @@ static void draw_gpu_quadrant(float temp, bool valid)
 }
 
 // ============================================================================
-// 绘制分隔线（留出 2px 间隙，避免文字贴边）
+// Draw divider lines (2px gap to avoid text clipping)
 // ============================================================================
 static void draw_divider(void)
 {
-    // 垂直中线: x = 64，间隙 y: 2-62
+    // Vertical center: x=64, y: 2-62
     display.drawFastVLine(64, 2, 60, SSD1306_WHITE);
-    // 水平中线: y = 32，间隙 x: 2-126
+    // Horizontal center: y=32, x: 2-126
     display.drawFastHLine(2, 32, 124, SSD1306_WHITE);
 }
 
 // ============================================================================
-// UI 刷新任务
-// 周期：100ms（10Hz）
-// 布局（全部 1x 字号，白字黑底）：
+// UI refresh task
+// Period: 100ms (10Hz)
+// Layout (all 1x size, white-on-black):
 //   +------------+------------+
 //   | MODE 75%   | FAN 25k    |  y: 3
 //   |  Normal    |  65%       |  y: 14
@@ -146,7 +146,7 @@ void task_ui(void *pvParameters)
 {
     TickType_t last_wake = xTaskGetTickCount();
 
-    // 开机首帧
+    // Boot splash screen
     display.clearDisplay();
     display.setTextSize(1);
     display.setTextColor(SSD1306_WHITE);
@@ -174,7 +174,7 @@ void task_ui(void *pvParameters)
         bool    gpu_ok  = g_state.gpu_valid;
         uint32_t now    = millis();
 
-        // 数据超时检测
+        // Data timeout detection
         if (now - g_state.last_cpu_ms > DATA_TIMEOUT_MS) {
             cpu_ok = false;
         }
@@ -187,10 +187,10 @@ void task_ui(void *pvParameters)
 
         display.clearDisplay();
 
-        // 绘制分隔线
+        // Draw divider lines
         draw_divider();
 
-        // 绘制四个象限
+        // Draw four quadrants
         draw_mode_quadrant(mode);
         draw_fan_quadrant(duty, freq);
         draw_cpu_quadrant(cpu, cpu_ok);

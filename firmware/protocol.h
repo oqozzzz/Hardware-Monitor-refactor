@@ -5,7 +5,7 @@
 #include "fan_curve.h"
 
 // ============================================================================
-// 帧类型枚举
+// Frame type enumeration
 // ============================================================================
 enum class FrameType : uint8_t {
     TEMP_CPU,       // $CPU,65.4*XX
@@ -20,7 +20,7 @@ enum class FrameType : uint8_t {
 };
 
 // ============================================================================
-// 解析后的帧数据
+// Parsed frame data
 // ============================================================================
 struct TempData {
     float temperature;
@@ -32,24 +32,24 @@ struct ParsedFrame {
     union {
         TempData temp;          // TEMP_CPU / TEMP_GPU
         struct {
-            uint8_t      count;  // FCURVE_SET: 点数
+            uint8_t      count;  // FCURVE_SET: point count
             FanCurvePoint points[10];
         } fcurve;
         struct {
             uint8_t mode;       // MODE_SET: 1=QUIET,2=NORMAL,3=TURBO,4=MANUAL
-            int     freq;       // FREQ_SET: PWM 频率 Hz
-            uint8_t duty;       // DUTY_SET: 占空比 0-100%
+            int     freq;       // FREQ_SET: PWM frequency Hz
+            uint8_t duty;       // DUTY_SET: duty cycle 0-100%
         } ctrl;
     };
 };
 
 // ============================================================================
-// 帧解析（仅支持新格式: $TYPE,PAYLOAD*XX）
+// Frame parser (new format only: $TYPE,PAYLOAD*XX)
 // ============================================================================
 bool parse_frame(const char *line, size_t len, ParsedFrame &out);
 
 // ============================================================================
-// 帧构建器（输出到调用者提供的缓冲区，返回写入字节数不含 '\0'）
+// Frame builders (output to caller-provided buffer, return bytes written excluding '\0')
 // ============================================================================
 size_t build_status_response(char *buf, size_t buf_size,
                              int mode, uint8_t duty_pct, int freq_hz,
