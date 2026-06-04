@@ -322,16 +322,22 @@ namespace CPUwenduhuoqu
         private void OnConnectionChanged(object s, bool connected)
         {
             if (IsDisposed) return;
+            try
+            {
             BeginInvoke(new Action(() =>
             {
                 if (IsDisposed) return;
                 labelConnectionStatus.Text = connected ? "已连接" : "已断开";
             }));
+            }
+            catch (ObjectDisposedException) { }
         }
 
         private void OnDataReceived(object s, string frame)
         {
             if (IsDisposed) return;
+            try
+            {
             BeginInvoke(new Action(() =>
             {
                 if (IsDisposed) return;
@@ -344,6 +350,8 @@ namespace CPUwenduhuoqu
                         UpdateDashboard(status);
                     }
             }));
+            }
+            catch (ObjectDisposedException) { }
         }
 
         // ====================================================================
