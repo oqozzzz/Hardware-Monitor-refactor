@@ -21,10 +21,13 @@ namespace CPUwenduhuoqu.Hardware
         public List<(string valueName, string displayName)> CpuSensors { get; } = new List<(string, string)>();
         public List<(string valueName, string displayName)> GpuSensors { get; } = new List<(string, string)>();
 
+        public string LastErrorMessage { get; private set; }
+
         public bool LoadSensors()
         {
             CpuSensors.Clear();
             GpuSensors.Clear();
+            LastErrorMessage = null;
 
             try
             {
@@ -48,8 +51,9 @@ namespace CPUwenduhuoqu.Hardware
                 key.Close();
                 return CpuSensors.Count > 0 || GpuSensors.Count > 0;
             }
-            catch
+            catch (Exception ex)
             {
+                LastErrorMessage = "读取 AIDA64 注册表失败: " + ex.Message;
                 return false;
             }
         }

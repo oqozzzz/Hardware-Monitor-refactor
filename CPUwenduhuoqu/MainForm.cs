@@ -140,7 +140,7 @@ namespace CPUwenduhuoqu
             var aida = new Aida64MonitorService();
             if (!aida.LoadSensors())
             {
-                MessageBox.Show("未在注册表中找到 AIDA64 传感器。\n请检查 AIDA64 配置。",
+                MessageBox.Show("未找到 AIDA64 传感器。\n" + aida.LastErrorMessage + "\n请检查 AIDA64 是否正在运行且已启用注册表共享。",
                     "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 checkBoxUseAida64Mode.Checked = false;
                 aida.Dispose();
