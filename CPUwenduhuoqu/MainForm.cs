@@ -237,7 +237,7 @@ namespace CPUwenduhuoqu
                 {
                     var (cpuTemp, gpuTemp) = _monitor.ReadTemperatures();
 
-                    cpuTempLabel.Invoke(new Action(() =>
+                    BeginInvoke(new Action(() =>
                     {
                         cpuTempLabel.Text = $"CPU 温度: {(cpuTemp.HasValue ? cpuTemp.Value.ToString("F1") + " °C" : "无数据")}";
                         gpuTempLabel.Text = $"GPU 温度: {(gpuTemp.HasValue ? gpuTemp.Value.ToString("F1") + " °C" : "无数据")}";
