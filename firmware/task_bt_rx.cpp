@@ -4,6 +4,7 @@
 #include "config.h"
 #include <BluetoothSerial.h>
 #include <string.h>
+#include <math.h>
 
 extern BluetoothSerial SerialBT;
 
@@ -69,7 +70,7 @@ void task_bt_rx(void *pvParameters)
                                     if (i > 0 && frame.fcurve.points[i].temperature <=
                                         frame.fcurve.points[i - 1].temperature) ok = false;
                                 }
-                                if (frame.fcurve.points[0].temperature != 0.0f) ok = false;
+                                if (fabsf(frame.fcurve.points[0].temperature) > 0.01f) ok = false;
 
                                 if (ok && g_state.tx_queue) {
                                     state_set_fan_curve(frame.fcurve.points, frame.fcurve.count);

@@ -19,8 +19,8 @@ bool FanCurve::set_points(const FanCurvePoint *points, uint8_t count)
         if (points[i].duty_percent > 100) return false;
         if (i > 0 && points[i].temperature <= points[i - 1].temperature) return false;
     }
-    // 第一点温度必须为 0
-    if (points[0].temperature != 0.0f) return false;
+    // First point temperature must be ~0 (tolerance for float parsing)
+    if (fabsf(points[0].temperature) > 0.01f) return false;
 
     _count = count;
     for (uint8_t i = 0; i < count; i++) {
