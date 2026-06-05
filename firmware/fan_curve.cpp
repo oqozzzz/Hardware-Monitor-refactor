@@ -14,11 +14,12 @@ bool FanCurve::set_points(const FanCurvePoint *points, uint8_t count)
 {
     if (count < 2 || count > MAX_CURVE_POINTS) return false;
 
-    // Validate duty range [MIN_SAFE_DUTY_PERCENT, 100] and monotonic temperature
+    // Validate duty range [MIN_SAFE_DUTY_PERCENT, 100], monotonic temperature and duty
     for (uint8_t i = 0; i < count; i++) {
         if (points[i].duty_percent < MIN_SAFE_DUTY_PERCENT) return false;  // P0-5: enforce minimum safe duty
         if (points[i].duty_percent > 100) return false;
         if (i > 0 && points[i].temperature <= points[i - 1].temperature) return false;
+        if (i > 0 && points[i].duty_percent < points[i - 1].duty_percent) return false;  // P1-8: monotonic duty
     }
     // First point temperature must be ~0 (tolerance for float parsing)
     if (fabsf(points[0].temperature) > 0.01f) return false;
@@ -32,7 +33,7 @@ bool FanCurve::set_points(const FanCurvePoint *points, uint8_t count)
 
 uint8_t FanCurve::lookup(float temp) const
 {
-    if (_count == 0) return 100; //     
+    if (_count == 0) return 100; // safety: full speed when no curve defined
 
     if (temp <= _points[0].temperature)
         return _points[0].duty_percent;
@@ -65,9 +66,10 @@ uint8_t FanCurve::lookup(float temp) const
 
             float duty = c0 * d0 + c1 * d1 + c2 * d2 + c3 * d3;
 
-            //           
-            if (duty < d1) duty = d1;
-            if (duty > d2) duty = d2;
+            // P1-8: safe range clamp [0%, 100%] — monotonic duty enforcement
+            // removes the need for per-segment d1/d2 clamping
+            if (duty < 0.0f) duty = 0.0f;
+            if (duty > 100.0f) duty = 100.0f;
 
             return static_cast<uint8_t>(duty);
         }

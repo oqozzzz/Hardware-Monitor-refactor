@@ -83,6 +83,8 @@ void task_bt_rx(void *pvParameters)
                                     if (frame.fcurve.points[i].duty_percent > 100) ok = false;
                                     if (i > 0 && frame.fcurve.points[i].temperature <=
                                         frame.fcurve.points[i - 1].temperature) ok = false;
+                                    if (i > 0 && frame.fcurve.points[i].duty_percent <
+                                        frame.fcurve.points[i - 1].duty_percent) ok = false;  // P1-8: monotonic duty
                                 }
                                 if (fabsf(frame.fcurve.points[0].temperature) > 0.01f) ok = false;
 
