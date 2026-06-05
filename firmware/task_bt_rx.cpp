@@ -9,13 +9,26 @@
 extern BluetoothSerial SerialBT;
 
 // ============================================================================
-//       
-//            '\n'             FrameType   
-//   
-//   -        128   rx_idx    size_t
-//   - 100ms            
-//   -    legacy     
-//   -   /       tx_queue     
+// P1-10: Helper functions to eliminate repeated ACK/NACK inline code (6+ occurrences)
+// ============================================================================
+static void send_ack()
+{
+    if (!g_state.tx_queue) return;
+    char buf[TX_BUF_SIZE];
+    size_t len = build_ack(buf, TX_BUF_SIZE);
+    if (len > 0) { buf[len] = '\0'; xQueueSend(g_state.tx_queue, buf, 0); }
+}
+
+static void send_nack(uint8_t code)
+{
+    if (!g_state.tx_queue) return;
+    char buf[TX_BUF_SIZE];
+    size_t len = build_nack(buf, TX_BUF_SIZE, code);
+    if (len > 0) { buf[len] = '\0'; xQueueSend(g_state.tx_queue, buf, 0); }
+}
+
+// ============================================================================
+// Bluetooth RX task: reads frames from Bluetooth Serial, parses and dispatches
 // ============================================================================
 void task_bt_rx(void *pvParameters)
 {
@@ -75,33 +88,16 @@ void task_bt_rx(void *pvParameters)
 
                                 if (ok && g_state.tx_queue) {
                                     state_set_fan_curve(frame.fcurve.points, frame.fcurve.count);
-                                    //    ACK
-                                    char ack_buf[TX_BUF_SIZE];
-                                    size_t ack_len = build_ack(ack_buf, TX_BUF_SIZE);
-                                    if (ack_len > 0) {
-                                        ack_buf[ack_len] = '\0';
-                                        xQueueSend(g_state.tx_queue, ack_buf, 0);
-                                    }
+                                    send_ack();  // P1-10
                                 } else if (g_state.tx_queue) {
-                                    //    NACK
-                                    char nack_buf[TX_BUF_SIZE];
-                                    uint8_t code = ok ? 2 : 3;
-                                    size_t nack_len = build_nack(nack_buf, TX_BUF_SIZE, code);
-                                    if (nack_len > 0) {
-                                        nack_buf[nack_len] = '\0';
-                                        xQueueSend(g_state.tx_queue, nack_buf, 0);
-                                    }
+                                    send_nack(3);  // P1-10: code always 3 (ok is false in else branch)
                                 }
                                 break;
                             }
 
                             case FrameType::MODE_SET:
                                 state_set_mode(static_cast<OpMode>(frame.ctrl.mode));
-                                if (g_state.tx_queue) {
-                                    char ack_buf[TX_BUF_SIZE];
-                                    size_t ack_len = build_ack(ack_buf, TX_BUF_SIZE);
-                                    if (ack_len > 0) { ack_buf[ack_len] = '\0'; xQueueSend(g_state.tx_queue, ack_buf, 0); }
-                                }
+                                send_ack();  // P1-10
                                 break;
 
                             case FrameType::FREQ_SET:
@@ -110,21 +106,13 @@ void task_bt_rx(void *pvParameters)
                                 g_state.pending_freq_hz = frame.ctrl.freq;
                                 g_state.freq_change_pending = true;
                                 state_unlock();
-                                if (g_state.tx_queue) {
-                                    char ack_buf[TX_BUF_SIZE];
-                                    size_t ack_len = build_ack(ack_buf, TX_BUF_SIZE);
-                                    if (ack_len > 0) { ack_buf[ack_len] = '\0'; xQueueSend(g_state.tx_queue, ack_buf, 0); }
-                                }
+                                send_ack();  // P1-10
                                 break;
 
                             case FrameType::DUTY_SET: {
                                 uint8_t duty_raw = static_cast<uint8_t>(map(frame.ctrl.duty, 0, 100, 0, 255));
                                 state_set_target_duty(duty_raw);
-                                if (g_state.tx_queue) {
-                                    char ack_buf[TX_BUF_SIZE];
-                                    size_t ack_len = build_ack(ack_buf, TX_BUF_SIZE);
-                                    if (ack_len > 0) { ack_buf[ack_len] = '\0'; xQueueSend(g_state.tx_queue, ack_buf, 0); }
-                                }
+                                send_ack();  // P1-10
                                 break;
                             }
 
@@ -133,37 +121,18 @@ void task_bt_rx(void *pvParameters)
                                 g_state.safety_override = false;
                                 g_state.display_dirty = true;
                                 state_unlock();
-                                if (g_state.tx_queue) {
-                                    char ack_buf[TX_BUF_SIZE];
-                                    size_t ack_len = build_ack(ack_buf, TX_BUF_SIZE);
-                                    if (ack_len > 0) { ack_buf[ack_len] = '\0'; xQueueSend(g_state.tx_queue, ack_buf, 0); }
-                                }
+                                send_ack();  // P1-10
                                 break;
 
                             case FrameType::UNKNOWN:
-                                if (g_state.tx_queue) {
-                                    char nack_buf[TX_BUF_SIZE];
-                                    size_t nack_len = build_nack(nack_buf, TX_BUF_SIZE, 1);
-                                    if (nack_len > 0) {
-                                        nack_buf[nack_len] = '\0';
-                                        xQueueSend(g_state.tx_queue, nack_buf, 0);
-                                    }
-                                }
+                                send_nack(1);  // P1-10
                                 break;
 
                             default:
                                 break;
                         }
                     } else {
-                        //               NACK
-                        if (g_state.tx_queue) {
-                            char nack_buf[TX_BUF_SIZE];
-                            size_t nack_len = build_nack(nack_buf, TX_BUF_SIZE, 1);
-                            if (nack_len > 0) {
-                                nack_buf[nack_len] = '\0';
-                                xQueueSend(g_state.tx_queue, nack_buf, 0);
-                            }
-                        }
+                        send_nack(1);  // P1-10: parse failure NACK
                     }
                     rx_idx = 0;
                 }
