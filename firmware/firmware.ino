@@ -45,7 +45,8 @@ void setup()
     //      
     // ------------------------------------------------------------------------
     SerialBT.begin("ESP32_FanController");
-    Serial.println(F("[INIT] Bluetooth started"));
+    SerialBT.setPin(BT_PIN_CODE);  // P0-3: Enable PIN authentication
+    Serial.println(F("[INIT] Bluetooth started (PIN auth enabled)"));
 
     // ------------------------------------------------------------------------
     // PWM       25kHz8          0%

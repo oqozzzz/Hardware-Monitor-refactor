@@ -106,6 +106,11 @@ constexpr size_t TX_BUF_SIZE = 80;
 constexpr size_t TX_QUEUE_SIZE = 8;
 
 // ============================================================================
+// Bluetooth security
+// ============================================================================
+constexpr const char* BT_PIN_CODE = "1234";  // P0-3: Bluetooth pairing PIN code
+
+// ============================================================================
 // Safety and watchdog
 // ============================================================================
 constexpr uint32_t WATCHDOG_TIMEOUT_S   = 5;
