@@ -3,6 +3,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <math.h>
 
 // ============================================================================
 // XOR    
@@ -46,7 +47,11 @@ bool parse_frame(const char *line, size_t len, ParsedFrame &out)
     {
         bool is_cpu = (data_start[0] == 'C');
         out.type = is_cpu ? FrameType::TEMP_CPU : FrameType::TEMP_GPU;
-        out.temp.temperature = strtof(data_start + 4, nullptr);
+        float temp = strtof(data_start + 4, nullptr);
+        // P1-3: reject NaN, Inf, and out-of-range temperatures
+        if (isnan(temp) || isinf(temp)) return false;
+        if (temp < -50.0f || temp > 150.0f) return false;
+        out.temp.temperature = temp;
         out.temp.valid = true;
         return true;
     }
