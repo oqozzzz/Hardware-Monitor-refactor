@@ -386,6 +386,14 @@ namespace CPUwenduhuoqu
                 return;
             }
 
+            // P1-7: validate first point temperature must be 0°C
+            if (points.Count > 0 && Math.Abs(points[0].Temperature) > 0.01f)
+            {
+                MessageBox.Show("风扇曲线第一点温度必须为 0°C", "校验失败",
+                                MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
             Task.Run(() => _serialService.Send(Protocol.BuildFcurveSet(points.ToArray())));
             AppendStatusLog($"TX: 风扇曲线已发送 ({points.Count} 点)");
         }

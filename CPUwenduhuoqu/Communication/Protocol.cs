@@ -170,9 +170,21 @@ namespace CPUwenduhuoqu.Communication
                 status.GpuTemp = float.Parse(parts[5], CultureInfo.InvariantCulture);
                 status.CpuValid = parts[6] == "1";
                 status.GpuValid = parts[7] == "1";
+
+                // P1-6: validate all parsed values are within acceptable ranges
+                if (status.Mode < 1 || status.Mode > 4) return false;
+                if (status.DutyPercent < 0 || status.DutyPercent > 100) return false;
+                if (status.FreqHz < 1000 || status.FreqHz > 40000) return false;
+                if (status.CpuTemp < -50f || status.CpuTemp > 150f) return false;
+                if (status.GpuTemp < -50f || status.GpuTemp > 150f) return false;
+
                 return true;
             }
-            catch
+            catch (FormatException)  // P1-9: use specific exception types instead of bare catch
+            {
+                return false;
+            }
+            catch (OverflowException)
             {
                 return false;
             }

@@ -113,7 +113,15 @@ namespace CPUwenduhuoqu.Hardware
                 key.Close();
                 return (cpu, gpu);
             }
-            catch
+            catch (System.FormatException)  // P1-9: use specific exception types
+            {
+                return (null, null);
+            }
+            catch (System.OverflowException)
+            {
+                return (null, null);
+            }
+            catch (System.Security.SecurityException)
             {
                 return (null, null);
             }
