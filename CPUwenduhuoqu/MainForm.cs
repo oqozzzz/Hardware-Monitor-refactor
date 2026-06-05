@@ -685,13 +685,14 @@ namespace CPUwenduhuoqu
 
         private void AppendStatusLog(string text)
         {
+            // P2-3: use Select+SelectedText for O(1) truncation instead of O(n) Lines array copy
             txtStatusLog.AppendText(text + Environment.NewLine);
             if (txtStatusLog.Lines.Length > 200)
             {
-                var lines = txtStatusLog.Lines;
-                var recent = new string[100];
-                Array.Copy(lines, lines.Length - 100, recent, 0, 100);
-                txtStatusLog.Lines = recent;
+                int removeEnd = txtStatusLog.GetFirstCharIndexFromLine(
+                    txtStatusLog.Lines.Length - 100);
+                txtStatusLog.Select(0, removeEnd);
+                txtStatusLog.SelectedText = "";
             }
         }
     }

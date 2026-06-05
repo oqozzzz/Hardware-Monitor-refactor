@@ -35,16 +35,25 @@ void task_bt_rx(void *pvParameters)
     static char    rx_buf[RX_BUF_SIZE];
     static size_t  rx_idx = 0;
     static uint32_t last_byte_ms = 0;
+    // P2-2: frame rate limiter
+    static uint32_t frame_count = 0;
+    static uint32_t frame_count_start_ms = 0;
     ParsedFrame frame;
 
     for (;;) {
-        //        100ms     
+        // Reset partial frame if idle >100ms
         uint32_t now = millis();
         if (rx_idx > 0 && now - last_byte_ms > 100) {
             rx_idx = 0;
         }
 
-        //         
+        // P2-2: reset frame rate counter every second
+        if (now - frame_count_start_ms >= 1000) {
+            frame_count = 0;
+            frame_count_start_ms = now;
+        }
+
+        // Read available bytes
         while (SerialBT.available()) {
             char c = SerialBT.read();
             last_byte_ms = now;
@@ -52,6 +61,12 @@ void task_bt_rx(void *pvParameters)
             if (c == '\n' || c == '\r') {
                 if (rx_idx > 0) {
                     rx_buf[rx_idx] = '\0';
+
+                    // P2-2: silently drop frames exceeding rate limit
+                    if (++frame_count > MAX_FRAMES_PER_SEC) {
+                        rx_idx = 0;
+                        continue;
+                    }
 
                     if (parse_frame(rx_buf, rx_idx, frame)) {
                         switch (frame.type) {

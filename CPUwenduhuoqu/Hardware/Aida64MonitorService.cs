@@ -103,13 +103,21 @@ namespace CPUwenduhuoqu.Hardware
                     if (cpuValName != null)
                     {
                         string cpuStr = key.GetValue(cpuValName)?.ToString();
-                        if (float.TryParse(cpuStr, out float cpuVal)) cpu = cpuVal;
+                        if (float.TryParse(cpuStr, out float cpuVal))
+                        {
+                            // P2-1: reject unreasonable temperature values
+                            if (cpuVal >= -50f && cpuVal <= 150f) cpu = cpuVal;
+                        }
                     }
 
                     if (gpuValName != null)
                     {
                         string gpuStr = key.GetValue(gpuValName)?.ToString();
-                        if (float.TryParse(gpuStr, out float gpuVal)) gpu = gpuVal;
+                        if (float.TryParse(gpuStr, out float gpuVal))
+                        {
+                            // P2-1: reject unreasonable temperature values
+                            if (gpuVal >= -50f && gpuVal <= 150f) gpu = gpuVal;
+                        }
                     }
 
                     return (cpu, gpu);

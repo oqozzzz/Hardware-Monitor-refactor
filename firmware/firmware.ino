@@ -38,7 +38,7 @@ void setup()
 {
     Serial.begin(115200);
     Serial.println(F("\n============================================"));
-    Serial.println(F("  ESP32 Fan Controller - Production FW v3.0"));
+    Serial.println(F("  ESP32 Fan Controller - Production FW " FIRMWARE_VERSION));
     Serial.println(F("============================================"));
 
     // ------------------------------------------------------------------------
@@ -74,7 +74,7 @@ void setup()
         display.setTextSize(1);
         display.setTextColor(SSD1306_WHITE);
         display.setCursor(24, 28);
-        display.print(F("Fan Ctrl v3"));
+        display.print(F("Fan Ctrl " FIRMWARE_VERSION));
         display.display();
         Serial.println(F("[INIT] OLED initialized"));
     }
