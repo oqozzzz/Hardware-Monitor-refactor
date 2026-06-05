@@ -83,7 +83,14 @@ void setup()
     // Initialize shared system state (mutex + defaults)
     // ------------------------------------------------------------------------
     if (!state_init()) {
-        Serial.println(F("[ERR] State init failed!"));
+        Serial.println(F("[ERR] State init failed! Halting system in safe mode."));
+        // CR #3: force fan 100% and halt — running without mutex would cause data corruption
+        ledcWrite(PWM_CHANNEL, PWM_MAX_DUTY);
+        while (true) {
+            // Blink onboard LED as SOS signal (implement on LED_BUILTIN if available)
+            vTaskDelay(pdMS_TO_TICKS(1000));
+            Serial.println(F("[FATAL] System halted — mutex init failed"));
+        }
     }
 
     // ------------------------------------------------------------------------
