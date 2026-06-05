@@ -619,18 +619,8 @@ namespace CPUwenduhuoqu
             btnRemoteDutyUp.Font = _btnFont;
             btnRemoteDutyDn.Font = _btnFont;
 
-            // P0-6: Safety reset button (programmatic, not in designer)
-            var btnSafetyReset = new Button
-            {
-                Text = "安全重置",
-                Location = new Point(560, 62),
-                Size = new Size(90, 28),
-                Font = _btnFont,
-                BackColor = Color.OrangeRed,
-                ForeColor = Color.White
-            };
-            btnSafetyReset.Click += BtnSafetyReset_Click;
-            dashboardPanel.Controls.Add(btnSafetyReset);
+            // P0-6: Safety reset button font (control defined in Designer)
+            btnSafetyReset.Font = _btnFont;
 
             // 日志文本框字体
             _logFont = new Font("Consolas", 8F);

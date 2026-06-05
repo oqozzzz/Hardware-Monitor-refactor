@@ -42,6 +42,7 @@ namespace CPUwenduhuoqu
         private Button btnToggleView;
         private Button btnRemoteMode, btnRemoteFreqUp, btnRemoteFreqDn;
         private Button btnRemoteDutyUp, btnRemoteDutyDn;
+        private Button btnSafetyReset;
 
         // ---- 风扇曲线区 ----
         private GroupBox grpFanCurve;
@@ -103,6 +104,7 @@ namespace CPUwenduhuoqu
             this.lblDashFan = new System.Windows.Forms.Label();
             this.lblDashMode = new System.Windows.Forms.Label();
             this.btnRemoteDutyDn = new System.Windows.Forms.Button();
+            this.btnSafetyReset = new System.Windows.Forms.Button();
             this.btnRemoteDutyUp = new System.Windows.Forms.Button();
             this.btnRemoteFreqDn = new System.Windows.Forms.Button();
             this.btnRemoteFreqUp = new System.Windows.Forms.Button();
@@ -350,6 +352,7 @@ namespace CPUwenduhuoqu
             this.dashboardPanel.Controls.Add(this.btnRemoteFreqDn);
             this.dashboardPanel.Controls.Add(this.btnRemoteFreqUp);
             this.dashboardPanel.Controls.Add(this.btnRemoteMode);
+            this.dashboardPanel.Controls.Add(this.btnSafetyReset);
             this.dashboardPanel.Location = new System.Drawing.Point(8, 24);
             this.dashboardPanel.Name = "dashboardPanel";
             this.dashboardPanel.Size = new System.Drawing.Size(634, 140);
@@ -479,6 +482,18 @@ namespace CPUwenduhuoqu
             this.btnRemoteMode.Text = "模式";
             this.btnRemoteMode.UseVisualStyleBackColor = true;
             this.btnRemoteMode.Click += new System.EventHandler(this.BtnRemoteMode_Click);
+            // 
+            // btnSafetyReset
+            // 
+            this.btnSafetyReset.BackColor = System.Drawing.Color.OrangeRed;
+            this.btnSafetyReset.ForeColor = System.Drawing.Color.White;
+            this.btnSafetyReset.Location = new System.Drawing.Point(560, 62);
+            this.btnSafetyReset.Name = "btnSafetyReset";
+            this.btnSafetyReset.Size = new System.Drawing.Size(90, 28);
+            this.btnSafetyReset.TabIndex = 7;
+            this.btnSafetyReset.Text = "安全重置";
+            this.btnSafetyReset.UseVisualStyleBackColor = false;
+            this.btnSafetyReset.Click += new System.EventHandler(this.BtnSafetyReset_Click);
             // 
             // txtStatusLog
             // 
