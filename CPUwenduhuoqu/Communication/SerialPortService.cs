@@ -92,8 +92,14 @@ namespace CPUwenduhuoqu.Communication
                 if (sp.IsOpen)
                     sp.Close();
             }
-            catch { }
-            try { sp.Dispose(); } catch { }
+            catch (Exception ex)  // CR #6: log exception instead of swallowing silently
+            {
+                Console.WriteLine($"SerialPortService: error closing port — {ex.GetType().Name}: {ex.Message}");
+            }
+            try { sp.Dispose(); } catch (Exception ex)
+            {
+                Console.WriteLine($"SerialPortService: error disposing port — {ex.GetType().Name}: {ex.Message}");
+            }
         }
 
         public void Send(string frame)
