@@ -3,9 +3,10 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <math.h>
 
 // ============================================================================
-// XOR    
+// XOR checksum calculation
 // ============================================================================
 static uint8_t calc_checksum(const char *data, size_t len)
 {
@@ -17,7 +18,7 @@ static uint8_t calc_checksum(const char *data, size_t len)
 }
 
 // ============================================================================
-//     (      : $TYPE,PAYLOAD*XX)
+// Frame parser (format: $TYPE,PAYLOAD*XX)
 // ============================================================================
 bool parse_frame(const char *line, size_t len, ParsedFrame &out)
 {
@@ -25,16 +26,16 @@ bool parse_frame(const char *line, size_t len, ParsedFrame &out)
 
     if (len < 6 || line[0] != '$') return false;
 
-    //          '*'
+    // Find '*' checksum separator
     const char *star = static_cast<const char *>(memchr(line, '*', len));
     if (!star) return false;
 
-    //    : $     *   
+    // Data section: between $ and *
     const char *data_start = line + 1;
     size_t data_len = star - data_start;
     if (data_len < 3) return false;
 
-    //      
+    // Verify checksum
     if (star + 3 > line + len) return false;
     char cs_buf[3] = {star[1], star[2], '\0'};
     uint8_t rx_cs = static_cast<uint8_t>(strtol(cs_buf, nullptr, 16));
@@ -46,7 +47,11 @@ bool parse_frame(const char *line, size_t len, ParsedFrame &out)
     {
         bool is_cpu = (data_start[0] == 'C');
         out.type = is_cpu ? FrameType::TEMP_CPU : FrameType::TEMP_GPU;
-        out.temp.temperature = strtof(data_start + 4, nullptr);
+        float temp = strtof(data_start + 4, nullptr);
+        // P1-3: reject NaN, Inf, and out-of-range temperatures
+        if (isnan(temp) || isinf(temp)) return false;
+        if (temp < -50.0f || temp > 150.0f) return false;
+        out.temp.temperature = temp;
         out.temp.valid = true;
         return true;
     }
@@ -67,7 +72,7 @@ bool parse_frame(const char *line, size_t len, ParsedFrame &out)
     if (data_len >= 6 && strncmp(data_start, "FCV,", 4) == 0) {
         const char *p = data_start + 4;
 
-        //      N
+        // Parse point count N
         uint8_t count = static_cast<uint8_t>(strtol(p, const_cast<char **>(&p), 10));
         if (count < 2 || count > 10) return false;
         if (*p != ',') return false;
@@ -108,9 +113,15 @@ bool parse_frame(const char *line, size_t len, ParsedFrame &out)
     // ---- DUTY_SET: $DUT,<0-100>*XX ----
     if (data_len >= 5 && strncmp(data_start, "DUT,", 4) == 0) {
         long duty = strtol(data_start + 4, nullptr, 10);
-        if (duty < 0 || duty > 100) return false;
+        if (duty < MIN_SAFE_DUTY_PERCENT || duty > 100) return false;  // P0-4: enforce minimum safe duty
         out.ctrl.duty = static_cast<uint8_t>(duty);
         out.type = FrameType::DUTY_SET;
+        return true;
+    }
+
+    // ---- SAFETY_RESET: $SAF*XX ----
+    if (data_len == 3 && strncmp(data_start, "SAF", 3) == 0) {
+        out.type = FrameType::SAFETY_RESET;
         return true;
     }
 
@@ -118,18 +129,18 @@ bool parse_frame(const char *line, size_t len, ParsedFrame &out)
 }
 
 // ============================================================================
-//     
+// Frame finalization: append *XX checksum and \n
 // ============================================================================
 
 static size_t finalize_frame(char *buf, size_t buf_size, size_t data_len)
 {
-    // data_len   $TYPE,PAYLOAD         
-    if (data_len + 4 > buf_size) return 0; // *XX\n\0
+    // data_len is length of $TYPE,PAYLOAD in buf
+    if (data_len + 4 > buf_size) return 0; // need room for *XX\n\0
 
-    const char *data_start = buf + 1; //    $
-    uint8_t cs = calc_checksum(data_start, data_len - 1); // -1    data_len   $
+    const char *data_start = buf + 1; // skip leading $
+    uint8_t cs = calc_checksum(data_start, data_len - 1); // -1 to exclude $ from checksum
 
-    //     buf      *XX\n
+    // Append *XX\n to buf at position data_len
     size_t total = data_len + snprintf(buf + data_len, buf_size - data_len, "*%02X\n", cs);
     return total;
 }

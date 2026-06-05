@@ -42,6 +42,7 @@ namespace CPUwenduhuoqu
         private Button btnToggleView;
         private Button btnRemoteMode, btnRemoteFreqUp, btnRemoteFreqDn;
         private Button btnRemoteDutyUp, btnRemoteDutyDn;
+        private Button btnSafetyReset;
 
         // ---- 风扇曲线区 ----
         private GroupBox grpFanCurve;
@@ -98,6 +99,7 @@ namespace CPUwenduhuoqu
             this.lblDashGpuOk = new System.Windows.Forms.Label();
             this.lblDashGpuTemp = new System.Windows.Forms.Label();
             this.lblDashCpuOk = new System.Windows.Forms.Label();
+            this.btnSafetyReset = new System.Windows.Forms.Button();
             this.lblDashCpuTemp = new System.Windows.Forms.Label();
             this.lblDashFreq = new System.Windows.Forms.Label();
             this.lblDashFan = new System.Windows.Forms.Label();
@@ -164,7 +166,7 @@ namespace CPUwenduhuoqu
             // labelConnectionStatus
             // 
             this.labelConnectionStatus.AutoSize = true;
-            this.labelConnectionStatus.Location = new System.Drawing.Point(218, 44);
+            this.labelConnectionStatus.Location = new System.Drawing.Point(212, 44);
             this.labelConnectionStatus.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.labelConnectionStatus.Name = "labelConnectionStatus";
             this.labelConnectionStatus.Size = new System.Drawing.Size(64, 24);
@@ -263,14 +265,14 @@ namespace CPUwenduhuoqu
             // 
             // domainUpDownSelectRefreshTime
             // 
-            this.domainUpDownSelectRefreshTime.Location = new System.Drawing.Point(386, 40);
+            this.domainUpDownSelectRefreshTime.Location = new System.Drawing.Point(477, 40);
             this.domainUpDownSelectRefreshTime.Name = "domainUpDownSelectRefreshTime";
             this.domainUpDownSelectRefreshTime.Size = new System.Drawing.Size(56, 30);
             this.domainUpDownSelectRefreshTime.TabIndex = 12;
             // 
             // buttonConfirmRefreshTime
             // 
-            this.buttonConfirmRefreshTime.Location = new System.Drawing.Point(448, 40);
+            this.buttonConfirmRefreshTime.Location = new System.Drawing.Point(536, 40);
             this.buttonConfirmRefreshTime.Name = "buttonConfirmRefreshTime";
             this.buttonConfirmRefreshTime.Size = new System.Drawing.Size(55, 32);
             this.buttonConfirmRefreshTime.TabIndex = 13;
@@ -307,7 +309,7 @@ namespace CPUwenduhuoqu
             // lblRefreshHint
             // 
             this.lblRefreshHint.AutoSize = true;
-            this.lblRefreshHint.Location = new System.Drawing.Point(300, 44);
+            this.lblRefreshHint.Location = new System.Drawing.Point(380, 43);
             this.lblRefreshHint.Name = "lblRefreshHint";
             this.lblRefreshHint.Size = new System.Drawing.Size(86, 24);
             this.lblRefreshHint.TabIndex = 20;
@@ -389,6 +391,18 @@ namespace CPUwenduhuoqu
             this.lblDashCpuOk.Name = "lblDashCpuOk";
             this.lblDashCpuOk.Size = new System.Drawing.Size(28, 20);
             this.lblDashCpuOk.TabIndex = 3;
+            // 
+            // btnSafetyReset
+            // 
+            this.btnSafetyReset.BackColor = System.Drawing.SystemColors.Control;
+            this.btnSafetyReset.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.btnSafetyReset.Location = new System.Drawing.Point(279, 40);
+            this.btnSafetyReset.Name = "btnSafetyReset";
+            this.btnSafetyReset.Size = new System.Drawing.Size(95, 32);
+            this.btnSafetyReset.TabIndex = 7;
+            this.btnSafetyReset.Text = "安全重置";
+            this.btnSafetyReset.UseVisualStyleBackColor = false;
+            this.btnSafetyReset.Click += new System.EventHandler(this.BtnSafetyReset_Click);
             // 
             // lblDashCpuTemp
             // 
@@ -554,6 +568,7 @@ namespace CPUwenduhuoqu
             this.Controls.Add(this.grpEsp32);
             this.Controls.Add(this.checkBoxMinimizeToTray);
             this.Controls.Add(this.lblRefreshHint);
+            this.Controls.Add(this.btnSafetyReset);
             this.Controls.Add(this.labelNoticeRefreshTimeAdjustmentWindow);
             this.Controls.Add(this.buttonConfirmRefreshTime);
             this.Controls.Add(this.domainUpDownSelectRefreshTime);

@@ -15,6 +15,7 @@ namespace CPUwenduhuoqu.Communication
         FcurveResponse,
         Ack,
         Nack,
+        SafetyReset,  // P0-6: remote safety override reset
         Unknown
     }
 
@@ -100,9 +101,14 @@ namespace CPUwenduhuoqu.Communication
 
         public static string BuildDutySet(int dutyPercent)
         {
-            if (dutyPercent < 0 || dutyPercent > 100)
-                throw new ArgumentException("Duty must be 0-100%");
+            if (dutyPercent < 20 || dutyPercent > 100)  // P0-4: enforce minimum safe duty
+                throw new ArgumentException("Duty must be 20-100%");
             return FinalizeFrame($"DUT,{dutyPercent}");
+        }
+
+        public static string BuildSafetyReset()  // P0-6: remote safety override reset
+        {
+            return FinalizeFrame("SAF");
         }
 
         // ---- 帧解析 ----
@@ -137,6 +143,7 @@ namespace CPUwenduhuoqu.Communication
             if (dataPart.StartsWith("FCP,")) return FrameType.FcurveResponse;
             if (dataPart == "ACK") return FrameType.Ack;
             if (dataPart.StartsWith("NAK,")) return FrameType.Nack;
+            if (dataPart == "SAF") return FrameType.SafetyReset;
 
             return FrameType.Unknown;
         }
@@ -163,9 +170,21 @@ namespace CPUwenduhuoqu.Communication
                 status.GpuTemp = float.Parse(parts[5], CultureInfo.InvariantCulture);
                 status.CpuValid = parts[6] == "1";
                 status.GpuValid = parts[7] == "1";
+
+                // P1-6: validate all parsed values are within acceptable ranges
+                if (status.Mode < 1 || status.Mode > 4) return false;
+                if (status.DutyPercent < 0 || status.DutyPercent > 100) return false;
+                if (status.FreqHz < 1000 || status.FreqHz > 40000) return false;
+                if (status.CpuTemp < -50f || status.CpuTemp > 150f) return false;
+                if (status.GpuTemp < -50f || status.GpuTemp > 150f) return false;
+
                 return true;
             }
-            catch
+            catch (FormatException)  // P1-9: use specific exception types instead of bare catch
+            {
+                return false;
+            }
+            catch (OverflowException)
             {
                 return false;
             }

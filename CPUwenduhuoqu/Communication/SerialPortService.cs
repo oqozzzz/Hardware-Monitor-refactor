@@ -44,6 +44,7 @@ namespace CPUwenduhuoqu.Communication
             }
             ClosePortInternal(oldPort);
 
+            bool isConnected = false;
             lock (_lock)
             {
                 try
@@ -56,18 +57,18 @@ namespace CPUwenduhuoqu.Communication
                     };
                     _serialPort.DataReceived += OnDataReceived;
                     _serialPort.Open();
+                    isConnected = true;
                 }
                 catch (Exception)
                 {
                     _serialPort?.Dispose();
                     _serialPort = null;
-                    ConnectionChanged?.Invoke(this, false);
-                    return false;
                 }
             }
 
-            ConnectionChanged?.Invoke(this, true);
-            return true;
+            // P0-1: ConnectionChanged 事件移到锁外触发，避免回调访问锁导致死锁
+            ConnectionChanged?.Invoke(this, isConnected);
+            return isConnected;
         }
 
         public void Close()
@@ -91,27 +92,31 @@ namespace CPUwenduhuoqu.Communication
                 if (sp.IsOpen)
                     sp.Close();
             }
-            catch { }
-            try { sp.Dispose(); } catch { }
+            catch (Exception ex)  // CR #6: log exception instead of swallowing silently
+            {
+                Console.WriteLine($"SerialPortService: error closing port — {ex.GetType().Name}: {ex.Message}");
+            }
+            try { sp.Dispose(); } catch (Exception ex)
+            {
+                Console.WriteLine($"SerialPortService: error disposing port — {ex.GetType().Name}: {ex.Message}");
+            }
         }
 
         public void Send(string frame)
         {
-            SerialPort sp;
+            // P0-2: IsOpen 检查与 Write 操作整体加锁，防止多线程并发导致帧数据损坏
             lock (_lock)
             {
-                sp = _serialPort;
-            }
-
-            if (sp != null && sp.IsOpen)
-            {
-                try
+                if (_serialPort != null && _serialPort.IsOpen)
                 {
-                    sp.Write(frame);
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"SerialPortService send error: {ex.Message}");
+                    try
+                    {
+                        _serialPort.Write(frame);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"SerialPortService send error: {ex.Message}");
+                    }
                 }
             }
         }

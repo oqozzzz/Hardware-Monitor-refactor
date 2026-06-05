@@ -17,7 +17,7 @@
 #include "safety.h"
 
 // ============================================================================
-//       
+// Global objects
 // ============================================================================
 BluetoothSerial SerialBT;
 
@@ -32,23 +32,24 @@ const int BUTTON_PINS[BTN_COUNT] = {
 };
 
 // ============================================================================
-//    
+// Setup — initialize hardware and start FreeRTOS tasks
 // ============================================================================
 void setup()
 {
     Serial.begin(115200);
     Serial.println(F("\n============================================"));
-    Serial.println(F("  ESP32 Fan Controller - Production FW v3.0"));
+    Serial.println(F("  ESP32 Fan Controller - Production FW " FIRMWARE_VERSION));
     Serial.println(F("============================================"));
 
     // ------------------------------------------------------------------------
-    //      
+    // Bluetooth SPP setup
     // ------------------------------------------------------------------------
     SerialBT.begin("ESP32_FanController");
-    Serial.println(F("[INIT] Bluetooth started"));
+    SerialBT.setPin(BT_PIN_CODE);  // P0-3: Enable PIN authentication
+    Serial.println(F("[INIT] Bluetooth started (PIN auth enabled)"));
 
     // ------------------------------------------------------------------------
-    // PWM       25kHz8          0%
+    // PWM setup: 25kHz, 8-bit resolution, initial duty 0%
     // ------------------------------------------------------------------------
     ledcSetup(PWM_CHANNEL, PWM_FREQ_HZ, PWM_RES_BITS);
     ledcAttachPin(PIN_PWM_FAN, PWM_CHANNEL);
@@ -56,7 +57,7 @@ void setup()
     Serial.println(F("[INIT] PWM initialized @ 25kHz"));
 
     // ------------------------------------------------------------------------
-    //               HIGH
+    // Button pins: INPUT_PULLDOWN (active HIGH)
     // ------------------------------------------------------------------------
     for (int i = 0; i < BTN_COUNT; i++) {
         pinMode(BUTTON_PINS[i], INPUT_PULLDOWN);
@@ -64,7 +65,7 @@ void setup()
     Serial.println(F("[INIT] Buttons initialized"));
 
     // ------------------------------------------------------------------------
-    // OLED    
+    // OLED display init (SSD1306 128x64 I2C)
     // ------------------------------------------------------------------------
     if (!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) {
         Serial.println(F("[WARN] SSD1306 init failed, running headless"));
@@ -73,20 +74,27 @@ void setup()
         display.setTextSize(1);
         display.setTextColor(SSD1306_WHITE);
         display.setCursor(24, 28);
-        display.print(F("Fan Ctrl v3"));
+        display.print(F("Fan Ctrl " FIRMWARE_VERSION));
         display.display();
         Serial.println(F("[INIT] OLED initialized"));
     }
 
     // ------------------------------------------------------------------------
-    //                       
+    // Initialize shared system state (mutex + defaults)
     // ------------------------------------------------------------------------
     if (!state_init()) {
-        Serial.println(F("[ERR] State init failed!"));
+        Serial.println(F("[ERR] State init failed! Halting system in safe mode."));
+        // CR #3: force fan 100% and halt — running without mutex would cause data corruption
+        ledcWrite(PWM_CHANNEL, PWM_MAX_DUTY);
+        while (true) {
+            // Blink onboard LED as SOS signal (implement on LED_BUILTIN if available)
+            vTaskDelay(pdMS_TO_TICKS(1000));
+            Serial.println(F("[FATAL] System halted — mutex init failed"));
+        }
     }
 
     // ------------------------------------------------------------------------
-    //                     
+    // Create Bluetooth TX queue
     // ------------------------------------------------------------------------
     g_state.tx_queue = xQueueCreate(TX_QUEUE_SIZE, TX_BUF_SIZE);
     if (!g_state.tx_queue) {
@@ -96,7 +104,7 @@ void setup()
     }
 
     // ------------------------------------------------------------------------
-    //    FreeRTOS         Core 1 / APP CPU
+    // Start FreeRTOS tasks (all pinned to Core 1 / APP CPU)
     // ------------------------------------------------------------------------
     xTaskCreatePinnedToCore(task_bt_rx,   "bt_rx",   STACK_BT_RX,   NULL, PRIO_BT_RX,   NULL, 1);
     xTaskCreatePinnedToCore(task_bt_tx,   "bt_tx",   STACK_BT_TX,   NULL, PRIO_BT_TX,   NULL, 1);
@@ -110,7 +118,7 @@ void setup()
 }
 
 // ============================================================================
-//    
+// Main loop — periodic status print every 10s
 // ============================================================================
 void loop()
 {

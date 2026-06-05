@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Configuration;
 
 namespace CPUwenduhuoqu.Configuration
@@ -8,6 +9,9 @@ namespace CPUwenduhuoqu.Configuration
         private const int DefaultRefreshIntervalMs = 5000;
         private const string DefaultSerialPortName = "COM3";
         private const int DefaultBaudRate = 115200;
+
+        // CR #4: buffer writes to avoid I/O storm on repeated setter calls
+        private readonly Dictionary<string, string> _pending = new Dictionary<string, string>();
 
         public int RefreshIntervalMs
         {
@@ -59,38 +63,48 @@ namespace CPUwenduhuoqu.Configuration
 
         public void Save()
         {
+            if (_pending.Count == 0) return;  // CR #4: skip if nothing changed
+
             var config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+            foreach (var kv in _pending)
+            {
+                if (config.AppSettings.Settings[kv.Key] != null)
+                    config.AppSettings.Settings[kv.Key].Value = kv.Value;
+                else
+                    config.AppSettings.Settings.Add(kv.Key, kv.Value);
+            }
             config.Save(ConfigurationSaveMode.Modified);
             ConfigurationManager.RefreshSection("appSettings");
+            _pending.Clear();
         }
 
         private string GetStringValue(string key, string defaultValue)
         {
+            if (_pending.TryGetValue(key, out string pendingVal)) return pendingVal;
             string val = ConfigurationManager.AppSettings[key];
             return string.IsNullOrEmpty(val) ? defaultValue : val;
         }
 
         private int GetIntValue(string key, int defaultValue)
         {
+            if (_pending.TryGetValue(key, out string pendingVal) && int.TryParse(pendingVal, out int result))
+                return result;
             string val = ConfigurationManager.AppSettings[key];
-            return int.TryParse(val, out int result) ? result : defaultValue;
+            return int.TryParse(val, out int parsed) ? parsed : defaultValue;
         }
 
         private bool GetBoolValue(string key, bool defaultValue)
         {
+            if (_pending.TryGetValue(key, out string pendingVal) && bool.TryParse(pendingVal, out bool result))
+                return result;
             string val = ConfigurationManager.AppSettings[key];
-            return bool.TryParse(val, out bool result) ? result : defaultValue;
+            return bool.TryParse(val, out bool parsed) ? parsed : defaultValue;
         }
 
         private void SetValue(string key, string value)
         {
-            var config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
-            if (config.AppSettings.Settings[key] != null)
-                config.AppSettings.Settings[key].Value = value;
-            else
-                config.AppSettings.Settings.Add(key, value);
-            config.Save(ConfigurationSaveMode.Modified);
-            ConfigurationManager.RefreshSection("appSettings");
+            // CR #4: buffer writes — only flush on explicit Save()
+            _pending[key] = value;
         }
     }
 }

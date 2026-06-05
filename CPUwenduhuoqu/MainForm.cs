@@ -2,6 +2,7 @@
 using System.Drawing;
 using System.IO.Ports;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using CPUwenduhuoqu.Communication;
@@ -19,6 +20,7 @@ namespace CPUwenduhuoqu
         private StatusData _lastStatus;
         private bool _isExiting;
         private bool _hasReceivedStatus;
+        private int _tickBusy;  // CR #1: Interlocked gate to prevent timer task pileup
 
         // Shared font resources (disposed in Dispose override)
         private Font _headFont;
@@ -238,6 +240,9 @@ namespace CPUwenduhuoqu
         {
             if (_monitor == null) return;
 
+            // CR #1: prevent fire-and-forget task pileup when tick is faster than work
+            if (Interlocked.CompareExchange(ref _tickBusy, 1, 0) != 0) return;
+
             Task.Run(() =>
             {
                 try
@@ -258,6 +263,10 @@ namespace CPUwenduhuoqu
                 catch (Exception ex)
                 {
                     Console.WriteLine($"Timer tick error: {ex.Message}");
+                }
+                finally
+                {
+                    Interlocked.Exchange(ref _tickBusy, 0);
                 }
             });
         }
@@ -386,8 +395,32 @@ namespace CPUwenduhuoqu
                 return;
             }
 
-            Task.Run(() => _serialService.Send(Protocol.BuildFcurveSet(points.ToArray())));
-            AppendStatusLog($"TX: 风扇曲线已发送 ({points.Count} 点)");
+            // P1-7: validate first point temperature must be 0°C
+            if (points.Count > 0 && Math.Abs(points[0].Temperature) > 0.01f)
+            {
+                MessageBox.Show("风扇曲线第一点温度必须为 0°C", "校验失败",
+                                MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            // P3-15: validate minimum point count and wrap in try-catch
+            if (points.Count < 2)
+            {
+                MessageBox.Show("风扇曲线至少需要 2 个点", "校验失败",
+                                MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            try
+            {
+                Task.Run(() => _serialService.Send(Protocol.BuildFcurveSet(points.ToArray())));
+                AppendStatusLog($"TX: 风扇曲线已发送 ({points.Count} 点)");
+            }
+            catch (ArgumentException ex)
+            {
+                MessageBox.Show($"曲线数据无效: {ex.Message}", "发送失败",
+                                MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private void BtnReadCurve_Click(object sender, EventArgs e)
@@ -437,8 +470,15 @@ namespace CPUwenduhuoqu
         private void BtnRemoteDutyDn_Click(object sender, EventArgs e)
         {
             if (!CheckReadyForRemote()) return;
-            int newDuty = Math.Max(_lastStatus.DutyPercent - 10, 0);
+            int newDuty = Math.Max(_lastStatus.DutyPercent - 10, 20);  // P0-4: minimum safe duty 20%
             Task.Run(() => _serialService.Send(Protocol.BuildDutySet(newDuty)));
+        }
+
+        private void BtnSafetyReset_Click(object sender, EventArgs e)  // P0-6
+        {
+            if (!CheckConnected()) return;
+            Task.Run(() => _serialService.Send(Protocol.BuildSafetyReset()));
+            AppendStatusLog("TX: 安全重置命令已发送");
         }
 
         // ====================================================================
@@ -579,6 +619,9 @@ namespace CPUwenduhuoqu
             btnRemoteDutyUp.Font = _btnFont;
             btnRemoteDutyDn.Font = _btnFont;
 
+            // P0-6: Safety reset button font (control defined in Designer)
+            btnSafetyReset.Font = _btnFont;
+
             // 日志文本框字体
             _logFont = new Font("Consolas", 8F);
             txtStatusLog.Font = _logFont;
@@ -657,13 +700,14 @@ namespace CPUwenduhuoqu
 
         private void AppendStatusLog(string text)
         {
+            // P2-3: use Select+SelectedText for O(1) truncation instead of O(n) Lines array copy
             txtStatusLog.AppendText(text + Environment.NewLine);
             if (txtStatusLog.Lines.Length > 200)
             {
-                var lines = txtStatusLog.Lines;
-                var recent = new string[100];
-                Array.Copy(lines, lines.Length - 100, recent, 0, 100);
-                txtStatusLog.Lines = recent;
+                int removeEnd = txtStatusLog.GetFirstCharIndexFromLine(
+                    txtStatusLog.Lines.Length - 100);
+                txtStatusLog.Select(0, removeEnd);
+                txtStatusLog.SelectedText = "";
             }
         }
     }

@@ -40,9 +40,28 @@ void task_safety(void *pvParameters)
             state_lock();
             g_state.safety_override = true;
             g_state.target_duty = PWM_MAX_DUTY;
+            g_state.fault_timestamp = millis();  // P0-6: record fault time for auto-recovery
             state_unlock();
             ledcWrite(PWM_CHANNEL, PWM_MAX_DUTY);
             Serial.println(F("[SAFETY] Fault detected! Fan forced to 100%"));
+        } else {
+            // CR #2: read safety_override under mutex to avoid data race
+            state_lock();
+            bool is_override = g_state.safety_override;
+            uint32_t fault_ts = g_state.fault_timestamp;
+            state_unlock();
+
+            if (is_override) {
+                // P0-6: Auto-recovery — if heartbeat is restored for SAFETY_RECOVERY_DELAY_MS,
+                // automatically clear safety_override to resume normal fan control
+                if (millis() - fault_ts > SAFETY_RECOVERY_DELAY_MS) {
+                    state_lock();
+                    g_state.safety_override = false;
+                    g_state.display_dirty = true;
+                    state_unlock();
+                    Serial.println(F("[SAFETY] Recovered, resuming normal control"));
+                }
+            }
         }
 
         esp_task_wdt_reset();

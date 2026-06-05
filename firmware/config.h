@@ -106,11 +106,24 @@ constexpr size_t TX_BUF_SIZE = 80;
 constexpr size_t TX_QUEUE_SIZE = 8;
 
 // ============================================================================
+// Bluetooth security
+// ============================================================================
+constexpr const char* BT_PIN_CODE = "1234";  // P0-3: Bluetooth pairing PIN code
+#define FIRMWARE_VERSION "v3.0"  // P2-8: single source of truth (must be #define for F() macro)
+constexpr uint8_t MAX_FRAMES_PER_SEC = 10;  // P2-2: rate-limit incoming frames
+
+// ============================================================================
 // Safety and watchdog
 // ============================================================================
 constexpr uint32_t WATCHDOG_TIMEOUT_S   = 5;
 constexpr uint32_t HEARTBEAT_TIMEOUT_MS = 3000; // Task heartbeat timeout threshold
 constexpr uint32_t DATA_TIMEOUT_MS      = 5000; // Temperature data timeout (BT disconnect guard)
+
+// ============================================================================
+// Safety limits
+// ============================================================================
+constexpr uint8_t MIN_SAFE_DUTY_PERCENT = 20;  // P0-4/5: Minimum safe fan duty (prevents stall)
+constexpr uint32_t SAFETY_RECOVERY_DELAY_MS = 30000;  // P0-6: Auto-recover from safety override after 30s heartbeat
 
 // ============================================================================
 // Run modes
