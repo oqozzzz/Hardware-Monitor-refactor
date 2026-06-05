@@ -1,0 +1,122 @@
+{
+  "description": "Protocol consistency test vectors — shared between C# and ESP32 tests",
+  "version": "1.0",
+  "vectors": [
+    {
+      "id": "temp_cpu_normal",
+      "description": "Normal CPU temperature frame",
+      "frame_data": "CPU,45.5",
+      "expected_type": "TEMP_CPU",
+      "expected_values": { "temperature": 45.5 }
+    },
+    {
+      "id": "temp_gpu_normal",
+      "description": "Normal GPU temperature frame",
+      "frame_data": "GPU,72.1",
+      "expected_type": "TEMP_GPU",
+      "expected_values": { "temperature": 72.1 }
+    },
+    {
+      "id": "status_query",
+      "description": "Status query frame",
+      "frame_data": "STA,?",
+      "expected_type": "STATUS_QUERY"
+    },
+    {
+      "id": "fcurve_query",
+      "description": "Fan curve query frame",
+      "frame_data": "FCQ,?",
+      "expected_type": "FCURVE_QUERY"
+    },
+    {
+      "id": "duty_set_normal",
+      "description": "Normal duty set (50%)",
+      "frame_data": "DUT,50",
+      "expected_type": "DUTY_SET",
+      "expected_values": { "duty": 50 }
+    },
+    {
+      "id": "duty_set_min_safe",
+      "description": "Minimum safe duty boundary (20%)",
+      "frame_data": "DUT,20",
+      "expected_type": "DUTY_SET",
+      "expected_values": { "duty": 20 }
+    },
+    {
+      "id": "duty_set_below_min",
+      "description": "Below minimum safe duty — should be rejected",
+      "frame_data": "DUT,19",
+      "expected_type": "UNKNOWN",
+      "expected_rejected": true
+    },
+    {
+      "id": "mode_set_normal",
+      "description": "Mode set to NORMAL (2)",
+      "frame_data": "MOD,2",
+      "expected_type": "MODE_SET",
+      "expected_values": { "mode": 2 }
+    },
+    {
+      "id": "mode_set_invalid",
+      "description": "Invalid mode (5) — should be rejected",
+      "frame_data": "MOD,5",
+      "expected_type": "UNKNOWN",
+      "expected_rejected": true
+    },
+    {
+      "id": "freq_set_normal",
+      "description": "Normal frequency set (25000 Hz)",
+      "frame_data": "FRQ,25000",
+      "expected_type": "FREQ_SET",
+      "expected_values": { "freq": 25000 }
+    },
+    {
+      "id": "safety_reset",
+      "description": "Safety override reset command",
+      "frame_data": "SAF",
+      "expected_type": "SAFETY_RESET"
+    },
+    {
+      "id": "ack_frame",
+      "description": "ACK frame",
+      "frame_data": "ACK",
+      "expected_type": "ACK"
+    },
+    {
+      "id": "nack_frame",
+      "description": "NACK frame with error code 3",
+      "frame_data": "NAK,03",
+      "expected_type": "NACK",
+      "expected_values": { "error_code": 3 }
+    },
+    {
+      "id": "status_response",
+      "description": "Status response frame",
+      "frame_data": "STP,2,50,25000,45.5,72.1,1,1",
+      "expected_type": "STATUS_RESPONSE",
+      "expected_values": {
+        "mode": 2,
+        "duty_pct": 50,
+        "freq_hz": 25000,
+        "cpu_temp": 45.5,
+        "gpu_temp": 72.1,
+        "cpu_valid": true,
+        "gpu_valid": true
+      }
+    },
+    {
+      "id": "fcurve_set_3points",
+      "description": "Fan curve set with 3 points",
+      "frame_data": "FCV,3,0.0,20,50.0,50,100.0,100",
+      "expected_type": "FCURVE_SET",
+      "expected_values": {
+        "count": 3,
+        "points": [
+          { "temp": 0.0, "duty": 20 },
+          { "temp": 50.0, "duty": 50 },
+          { "temp": 100.0, "duty": 100 }
+        ]
+      }
+    }
+  ]
+}
