@@ -109,7 +109,7 @@ constexpr size_t TX_QUEUE_SIZE = 8;
 // Bluetooth security
 // ============================================================================
 constexpr const char* BT_PIN_CODE = "1234";  // P0-3: Bluetooth pairing PIN code
-constexpr const char* FIRMWARE_VERSION = "v3.0";  // P2-8: single source of truth for version
+#define FIRMWARE_VERSION "v3.0"  // P2-8: single source of truth (must be #define for F() macro)
 constexpr uint8_t MAX_FRAMES_PER_SEC = 10;  // P2-2: rate-limit incoming frames
 
 // ============================================================================
