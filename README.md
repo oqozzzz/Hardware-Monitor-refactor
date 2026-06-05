@@ -9,7 +9,7 @@
 
 PC 端（C# WinForms）实时采集 CPU / GPU 温度，通过蓝牙 SPP 发送至 ESP32 微控制器；ESP32 运行 7 个 FreeRTOS 任务，执行 Catmull-Rom 样条插值 + Gamma 校正的温度-占空比映射，输出 25kHz PWM 信号控制风扇。
 
-![UI 截图](屏幕截图%202026-05-30%20221547.png)
+![UI 截图](截图.png)
 
 ---
 
