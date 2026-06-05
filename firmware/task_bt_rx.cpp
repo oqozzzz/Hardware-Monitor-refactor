@@ -128,6 +128,18 @@ void task_bt_rx(void *pvParameters)
                                 break;
                             }
 
+                            case FrameType::SAFETY_RESET:  // P0-6: remote safety override reset
+                                state_lock();
+                                g_state.safety_override = false;
+                                g_state.display_dirty = true;
+                                state_unlock();
+                                if (g_state.tx_queue) {
+                                    char ack_buf[TX_BUF_SIZE];
+                                    size_t ack_len = build_ack(ack_buf, TX_BUF_SIZE);
+                                    if (ack_len > 0) { ack_buf[ack_len] = '\0'; xQueueSend(g_state.tx_queue, ack_buf, 0); }
+                                }
+                                break;
+
                             case FrameType::UNKNOWN:
                                 if (g_state.tx_queue) {
                                     char nack_buf[TX_BUF_SIZE];

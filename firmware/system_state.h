@@ -46,7 +46,8 @@ struct SystemState {
     bool      display_dirty;  // when true, UI task refreshes OLED on next cycle
 
     // ---- Safety state -------------------------------------------------------
-    bool      safety_override; // set by safety task, forces PWM 100%, only reset clears
+    bool      safety_override; // set by safety task, forces PWM 100%
+    uint32_t  fault_timestamp; // P0-6: timestamp when safety_override was asserted
 
     // ---- Task heartbeats (monitored by safety task) -------------------------
     volatile uint32_t heartbeat_bt_rx;

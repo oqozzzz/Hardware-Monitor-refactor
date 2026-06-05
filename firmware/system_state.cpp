@@ -21,6 +21,8 @@ bool state_init(void)
     g_state.freq_change_pending = false;
     g_state.pending_freq_hz    = PWM_FREQ_HZ;
     g_state.display_dirty       = true;
+    g_state.safety_override     = false;  // P0-6: explicit init
+    g_state.fault_timestamp     = 0;      // P0-6: explicit init
 
     g_state.cpu_valid      = false;
     g_state.gpu_valid      = false;

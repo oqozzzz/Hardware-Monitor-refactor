@@ -15,6 +15,7 @@ namespace CPUwenduhuoqu.Communication
         FcurveResponse,
         Ack,
         Nack,
+        SafetyReset,  // P0-6: remote safety override reset
         Unknown
     }
 
@@ -100,9 +101,14 @@ namespace CPUwenduhuoqu.Communication
 
         public static string BuildDutySet(int dutyPercent)
         {
-            if (dutyPercent < 0 || dutyPercent > 100)
-                throw new ArgumentException("Duty must be 0-100%");
+            if (dutyPercent < 20 || dutyPercent > 100)  // P0-4: enforce minimum safe duty
+                throw new ArgumentException("Duty must be 20-100%");
             return FinalizeFrame($"DUT,{dutyPercent}");
+        }
+
+        public static string BuildSafetyReset()  // P0-6: remote safety override reset
+        {
+            return FinalizeFrame("SAF");
         }
 
         // ---- 帧解析 ----
@@ -137,6 +143,7 @@ namespace CPUwenduhuoqu.Communication
             if (dataPart.StartsWith("FCP,")) return FrameType.FcurveResponse;
             if (dataPart == "ACK") return FrameType.Ack;
             if (dataPart.StartsWith("NAK,")) return FrameType.Nack;
+            if (dataPart == "SAF") return FrameType.SafetyReset;
 
             return FrameType.Unknown;
         }

@@ -16,6 +16,7 @@ enum class FrameType : uint8_t {
     MODE_SET,       // $MOD,<1-4>*XX
     FREQ_SET,       // $FRQ,<hz>*XX
     DUTY_SET,       // $DUT,<0-100>*XX
+    SAFETY_RESET,   // $SAF*XX  P0-6: remote safety override reset
     UNKNOWN
 };
 

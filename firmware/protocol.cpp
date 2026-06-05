@@ -114,6 +114,12 @@ bool parse_frame(const char *line, size_t len, ParsedFrame &out)
         return true;
     }
 
+    // ---- SAFETY_RESET: $SAF*XX ----
+    if (data_len == 3 && strncmp(data_start, "SAF", 3) == 0) {
+        out.type = FrameType::SAFETY_RESET;
+        return true;
+    }
+
     return false;
 }
 

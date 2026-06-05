@@ -437,8 +437,15 @@ namespace CPUwenduhuoqu
         private void BtnRemoteDutyDn_Click(object sender, EventArgs e)
         {
             if (!CheckReadyForRemote()) return;
-            int newDuty = Math.Max(_lastStatus.DutyPercent - 10, 0);
+            int newDuty = Math.Max(_lastStatus.DutyPercent - 10, 20);  // P0-4: minimum safe duty 20%
             Task.Run(() => _serialService.Send(Protocol.BuildDutySet(newDuty)));
+        }
+
+        private void BtnSafetyReset_Click(object sender, EventArgs e)  // P0-6
+        {
+            if (!CheckConnected()) return;
+            Task.Run(() => _serialService.Send(Protocol.BuildSafetyReset()));
+            AppendStatusLog("TX: 安全重置命令已发送");
         }
 
         // ====================================================================
@@ -578,6 +585,19 @@ namespace CPUwenduhuoqu
             btnRemoteFreqDn.Font = _btnFont;
             btnRemoteDutyUp.Font = _btnFont;
             btnRemoteDutyDn.Font = _btnFont;
+
+            // P0-6: Safety reset button (programmatic, not in designer)
+            var btnSafetyReset = new Button
+            {
+                Text = "安全重置",
+                Location = new Point(560, 62),
+                Size = new Size(90, 28),
+                Font = _btnFont,
+                BackColor = Color.OrangeRed,
+                ForeColor = Color.White
+            };
+            btnSafetyReset.Click += BtnSafetyReset_Click;
+            dashboardPanel.Controls.Add(btnSafetyReset);
 
             // 日志文本框字体
             _logFont = new Font("Consolas", 8F);

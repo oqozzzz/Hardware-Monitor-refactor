@@ -121,6 +121,7 @@ constexpr uint32_t DATA_TIMEOUT_MS      = 5000; // Temperature data timeout (BT 
 // Safety limits
 // ============================================================================
 constexpr uint8_t MIN_SAFE_DUTY_PERCENT = 20;  // P0-4/5: Minimum safe fan duty (prevents stall)
+constexpr uint32_t SAFETY_RECOVERY_DELAY_MS = 30000;  // P0-6: Auto-recover from safety override after 30s heartbeat
 
 // ============================================================================
 // Run modes
