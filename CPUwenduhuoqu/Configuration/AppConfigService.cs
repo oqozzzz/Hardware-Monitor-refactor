@@ -87,18 +87,18 @@ namespace CPUwenduhuoqu.Configuration
 
         private int GetIntValue(string key, int defaultValue)
         {
-            if (_pending.TryGetValue(key, out string pendingVal))
-                return int.TryParse(pendingVal, out int result) ? result : defaultValue;
+            if (_pending.TryGetValue(key, out string pendingVal) && int.TryParse(pendingVal, out int result))
+                return result;
             string val = ConfigurationManager.AppSettings[key];
-            return int.TryParse(val, out int result) ? result : defaultValue;
+            return int.TryParse(val, out int parsed) ? parsed : defaultValue;
         }
 
         private bool GetBoolValue(string key, bool defaultValue)
         {
-            if (_pending.TryGetValue(key, out string pendingVal))
-                return bool.TryParse(pendingVal, out bool result) ? result : defaultValue;
+            if (_pending.TryGetValue(key, out string pendingVal) && bool.TryParse(pendingVal, out bool result))
+                return result;
             string val = ConfigurationManager.AppSettings[key];
-            return bool.TryParse(val, out bool result) ? result : defaultValue;
+            return bool.TryParse(val, out bool parsed) ? parsed : defaultValue;
         }
 
         private void SetValue(string key, string value)
