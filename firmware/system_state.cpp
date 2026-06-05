@@ -2,13 +2,13 @@
 #include <string.h>
 
 // ============================================================================
-//     
+// Global state instance
 // ============================================================================
 SystemState       g_state;
 SemaphoreHandle_t g_state_mutex = nullptr;
 
 // ============================================================================
-//    
+// State initialization
 // ============================================================================
 bool state_init(void)
 {
@@ -16,7 +16,7 @@ bool state_init(void)
 
     g_state.mode           = OpMode::NORMAL;
     g_state.pwm_freq_hz    = PWM_FREQ_HZ;
-    g_state.target_duty    = static_cast<uint8_t>(map(20, 0, 100, 0, 255)); //    20%
+    g_state.target_duty    = static_cast<uint8_t>(map(20, 0, 100, 0, 255)); // default 20%
     g_state.current_duty   = 0;
     g_state.freq_change_pending = false;
     g_state.pending_freq_hz    = PWM_FREQ_HZ;
@@ -31,10 +31,10 @@ bool state_init(void)
     g_state.status_query_pending = false;
     g_state.fcurve_query_pending = false;
 
-    //               
+    // Initialize fan curve to defaults
     g_state.fan_curve.reset_to_default();
 
-    // tx_queue   firmware.ino         
+    // tx_queue is created in firmware.ino setup()
     g_state.tx_queue = nullptr;
 
     g_state_mutex = xSemaphoreCreateMutex();
@@ -42,7 +42,7 @@ bool state_init(void)
 }
 
 // ============================================================================
-//      
+// Mutex helpers
 // ============================================================================
 void state_lock(void)
 {
@@ -59,7 +59,7 @@ void state_unlock(void)
 }
 
 // ============================================================================
-//          
+// Temperature setters
 // ============================================================================
 void state_set_temp(bool is_cpu, float temp)
 {
