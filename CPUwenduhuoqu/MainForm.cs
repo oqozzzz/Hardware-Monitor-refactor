@@ -394,8 +394,24 @@ namespace CPUwenduhuoqu
                 return;
             }
 
-            Task.Run(() => _serialService.Send(Protocol.BuildFcurveSet(points.ToArray())));
-            AppendStatusLog($"TX: 风扇曲线已发送 ({points.Count} 点)");
+            // P3-15: validate minimum point count and wrap in try-catch
+            if (points.Count < 2)
+            {
+                MessageBox.Show("风扇曲线至少需要 2 个点", "校验失败",
+                                MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            try
+            {
+                Task.Run(() => _serialService.Send(Protocol.BuildFcurveSet(points.ToArray())));
+                AppendStatusLog($"TX: 风扇曲线已发送 ({points.Count} 点)");
+            }
+            catch (ArgumentException ex)
+            {
+                MessageBox.Show($"曲线数据无效: {ex.Message}", "发送失败",
+                                MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private void BtnReadCurve_Click(object sender, EventArgs e)

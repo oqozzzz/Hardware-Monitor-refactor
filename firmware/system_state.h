@@ -49,13 +49,13 @@ struct SystemState {
     bool      safety_override; // set by safety task, forces PWM 100%
     uint32_t  fault_timestamp; // P0-6: timestamp when safety_override was asserted
 
-    // ---- Task heartbeats (monitored by safety task) -------------------------
-    volatile uint32_t heartbeat_bt_rx;
-    volatile uint32_t heartbeat_bt_tx;
-    volatile uint32_t heartbeat_control;
-    volatile uint32_t heartbeat_pwm;
-    volatile uint32_t heartbeat_ui;
-    volatile uint32_t heartbeat_button;
+    // ---- Task heartbeats (monitored by safety task, protected by mutex) ----
+    uint32_t heartbeat_bt_rx;     // P3-6: volatile removed — mutex-protected, volatile redundant
+    uint32_t heartbeat_bt_tx;
+    uint32_t heartbeat_control;
+    uint32_t heartbeat_pwm;
+    uint32_t heartbeat_ui;
+    uint32_t heartbeat_button;
 };
 
 // ============================================================================
