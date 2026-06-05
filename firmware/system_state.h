@@ -75,7 +75,7 @@ void state_set_temp(bool is_cpu, float temp);
 void state_set_target_duty(uint8_t duty);
 void state_set_current_duty(uint8_t duty);
 void state_set_mode(OpMode mode);
-void state_set_fan_curve(const FanCurvePoint *points, uint8_t count);
+bool state_set_fan_curve(const FanCurvePoint *points, uint8_t count);  // returns false if validation fails
 void state_mark_dirty(void);
 
 #endif // SYSTEM_STATE_H

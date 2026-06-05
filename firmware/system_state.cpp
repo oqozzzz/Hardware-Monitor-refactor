@@ -100,12 +100,13 @@ void state_set_mode(OpMode mode)
     state_unlock();
 }
 
-void state_set_fan_curve(const FanCurvePoint *points, uint8_t count)
+bool state_set_fan_curve(const FanCurvePoint *points, uint8_t count)
 {
     state_lock();
-    g_state.fan_curve.set_points(points, count);
-    g_state.display_dirty = true;
+    bool ok = g_state.fan_curve.set_points(points, count);
+    if (ok) g_state.display_dirty = true;
     state_unlock();
+    return ok;
 }
 
 void state_mark_dirty(void)

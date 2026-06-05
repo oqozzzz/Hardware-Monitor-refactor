@@ -91,23 +91,11 @@ void task_bt_rx(void *pvParameters)
                                 break;
 
                             case FrameType::FCURVE_SET: {
-                                bool ok = true;
-                                //       
-                                for (uint8_t i = 0; i < frame.fcurve.count; i++) {
-                                    if (frame.fcurve.points[i].duty_percent < MIN_SAFE_DUTY_PERCENT) ok = false;  // P0-5: enforce minimum safe duty
-                                    if (frame.fcurve.points[i].duty_percent > 100) ok = false;
-                                    if (i > 0 && frame.fcurve.points[i].temperature <=
-                                        frame.fcurve.points[i - 1].temperature) ok = false;
-                                    if (i > 0 && frame.fcurve.points[i].duty_percent <
-                                        frame.fcurve.points[i - 1].duty_percent) ok = false;  // P1-8: monotonic duty
-                                }
-                                if (fabsf(frame.fcurve.points[0].temperature) > 0.01f) ok = false;
-
-                                if (ok && g_state.tx_queue) {
-                                    state_set_fan_curve(frame.fcurve.points, frame.fcurve.count);
+                                // CR #7: validation dedup — FanCurve::set_points is the single source of truth
+                                if (state_set_fan_curve(frame.fcurve.points, frame.fcurve.count)) {
                                     send_ack();  // P1-10
                                 } else if (g_state.tx_queue) {
-                                    send_nack(3);  // P1-10: code always 3 (ok is false in else branch)
+                                    send_nack(3);  // P1-10: validation failed
                                 }
                                 break;
                             }
