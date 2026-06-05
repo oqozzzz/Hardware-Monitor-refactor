@@ -108,7 +108,7 @@ bool parse_frame(const char *line, size_t len, ParsedFrame &out)
     // ---- DUTY_SET: $DUT,<0-100>*XX ----
     if (data_len >= 5 && strncmp(data_start, "DUT,", 4) == 0) {
         long duty = strtol(data_start + 4, nullptr, 10);
-        if (duty < 0 || duty > 100) return false;
+        if (duty < MIN_SAFE_DUTY_PERCENT || duty > 100) return false;  // P0-4: enforce minimum safe duty
         out.ctrl.duty = static_cast<uint8_t>(duty);
         out.type = FrameType::DUTY_SET;
         return true;

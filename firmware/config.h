@@ -118,6 +118,11 @@ constexpr uint32_t HEARTBEAT_TIMEOUT_MS = 3000; // Task heartbeat timeout thresh
 constexpr uint32_t DATA_TIMEOUT_MS      = 5000; // Temperature data timeout (BT disconnect guard)
 
 // ============================================================================
+// Safety limits
+// ============================================================================
+constexpr uint8_t MIN_SAFE_DUTY_PERCENT = 20;  // P0-4/5: Minimum safe fan duty (prevents stall)
+
+// ============================================================================
 // Run modes
 // ============================================================================
 enum class OpMode : uint8_t {

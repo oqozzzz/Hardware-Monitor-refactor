@@ -66,6 +66,7 @@ void task_bt_rx(void *pvParameters)
                                 bool ok = true;
                                 //       
                                 for (uint8_t i = 0; i < frame.fcurve.count; i++) {
+                                    if (frame.fcurve.points[i].duty_percent < MIN_SAFE_DUTY_PERCENT) ok = false;  // P0-5: enforce minimum safe duty
                                     if (frame.fcurve.points[i].duty_percent > 100) ok = false;
                                     if (i > 0 && frame.fcurve.points[i].temperature <=
                                         frame.fcurve.points[i - 1].temperature) ok = false;

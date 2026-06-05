@@ -14,8 +14,9 @@ bool FanCurve::set_points(const FanCurvePoint *points, uint8_t count)
 {
     if (count < 2 || count > MAX_CURVE_POINTS) return false;
 
-    //         duty   [0, 100]
+    // Validate duty range [MIN_SAFE_DUTY_PERCENT, 100] and monotonic temperature
     for (uint8_t i = 0; i < count; i++) {
+        if (points[i].duty_percent < MIN_SAFE_DUTY_PERCENT) return false;  // P0-5: enforce minimum safe duty
         if (points[i].duty_percent > 100) return false;
         if (i > 0 && points[i].temperature <= points[i - 1].temperature) return false;
     }
