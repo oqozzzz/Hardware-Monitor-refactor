@@ -2,6 +2,7 @@
 using System.Drawing;
 using System.IO.Ports;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using CPUwenduhuoqu.Communication;
@@ -19,6 +20,7 @@ namespace CPUwenduhuoqu
         private StatusData _lastStatus;
         private bool _isExiting;
         private bool _hasReceivedStatus;
+        private int _tickBusy;  // CR #1: Interlocked gate to prevent timer task pileup
 
         // Shared font resources (disposed in Dispose override)
         private Font _headFont;
@@ -238,6 +240,9 @@ namespace CPUwenduhuoqu
         {
             if (_monitor == null) return;
 
+            // CR #1: prevent fire-and-forget task pileup when tick is faster than work
+            if (Interlocked.CompareExchange(ref _tickBusy, 1, 0) != 0) return;
+
             Task.Run(() =>
             {
                 try
@@ -258,6 +263,10 @@ namespace CPUwenduhuoqu
                 catch (Exception ex)
                 {
                     Console.WriteLine($"Timer tick error: {ex.Message}");
+                }
+                finally
+                {
+                    Interlocked.Exchange(ref _tickBusy, 0);
                 }
             });
         }
