@@ -31,24 +31,25 @@ namespace CPUwenduhuoqu.Hardware
 
             try
             {
-                RegistryKey key = Registry.CurrentUser.OpenSubKey(RegistryPath);
-                if (key == null) return false;
-
-                foreach (string valueName in key.GetValueNames())
+                using (RegistryKey key = Registry.CurrentUser.OpenSubKey(RegistryPath))  // P2-7: using ensures Dispose
                 {
-                    if (valueName.StartsWith("Label", StringComparison.OrdinalIgnoreCase))
+                    if (key == null) return false;
+
+                    foreach (string valueName in key.GetValueNames())
                     {
-                        string displayName = key.GetValue(valueName)?.ToString();
-                        if (string.IsNullOrEmpty(displayName)) continue;
+                        if (valueName.StartsWith("Label", StringComparison.OrdinalIgnoreCase))
+                        {
+                            string displayName = key.GetValue(valueName)?.ToString();
+                            if (string.IsNullOrEmpty(displayName)) continue;
 
-                        if (valueName.StartsWith("Label.TC", StringComparison.OrdinalIgnoreCase))
-                            CpuSensors.Add((valueName, displayName));
-                        else if (valueName.StartsWith("Label.TG", StringComparison.OrdinalIgnoreCase))
-                            GpuSensors.Add((valueName, displayName));
+                            if (valueName.StartsWith("Label.TC", StringComparison.OrdinalIgnoreCase))
+                                CpuSensors.Add((valueName, displayName));
+                            else if (valueName.StartsWith("Label.TG", StringComparison.OrdinalIgnoreCase))
+                                GpuSensors.Add((valueName, displayName));
+                        }
                     }
-                }
+                }  // auto-Dispose
 
-                key.Close();
                 return CpuSensors.Count > 0 || GpuSensors.Count > 0;
             }
             catch (Exception ex)
@@ -92,26 +93,27 @@ namespace CPUwenduhuoqu.Hardware
 
             try
             {
-                RegistryKey key = Registry.CurrentUser.OpenSubKey(RegistryPath);
-                if (key == null) return (null, null);
-
-                float? cpu = null;
-                float? gpu = null;
-
-                if (cpuValName != null)
+                using (RegistryKey key = Registry.CurrentUser.OpenSubKey(RegistryPath))  // P2-7: using ensures Dispose
                 {
-                    string cpuStr = key.GetValue(cpuValName)?.ToString();
-                    if (float.TryParse(cpuStr, out float cpuVal)) cpu = cpuVal;
-                }
+                    if (key == null) return (null, null);
 
-                if (gpuValName != null)
-                {
-                    string gpuStr = key.GetValue(gpuValName)?.ToString();
-                    if (float.TryParse(gpuStr, out float gpuVal)) gpu = gpuVal;
-                }
+                    float? cpu = null;
+                    float? gpu = null;
 
-                key.Close();
-                return (cpu, gpu);
+                    if (cpuValName != null)
+                    {
+                        string cpuStr = key.GetValue(cpuValName)?.ToString();
+                        if (float.TryParse(cpuStr, out float cpuVal)) cpu = cpuVal;
+                    }
+
+                    if (gpuValName != null)
+                    {
+                        string gpuStr = key.GetValue(gpuValName)?.ToString();
+                        if (float.TryParse(gpuStr, out float gpuVal)) gpu = gpuVal;
+                    }
+
+                    return (cpu, gpu);
+                }  // auto-Dispose
             }
             catch (System.FormatException)  // P1-9: use specific exception types
             {
